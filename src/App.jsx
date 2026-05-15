@@ -408,10 +408,11 @@ return (
 <div className="don-flag">🇦🇺</div>
 <h2 className="don-h2">Help A Struggling Aussie Family</h2>
 <p className="don-pitch">
-Rent’s gone up. Avo toast is in the twenties. A tinny won’t get change from a tenner.
-A flat white costs more than a federal government subsidy. Negative gearing on the family
-home just got grandfathered and Jim Chalmers called it “ambitious reform.”
-We’re not asking for much. Just enough to buy some milk this week.
+This one’s for the 26-year-old eating toast for dinner because rent took everything.
+For the couple who did everything right and still can’t save a deposit.
+For the family that skipped the school excursion this year.
+For everyone Jim Chalmers mentioned in his budget speech and immediately forgot about.
+<br/><br/>Keep the satire alive.
 </p>
 <p className="don-legal">(Satirical site. Donations go toward hosting costs and general bewilderment at Australian property prices.)</p>
 <div className="don-currency">
@@ -421,9 +422,9 @@ We accept donations in <strong>AUD or NZD</strong> — because at least one of t
 </span>
 </div>
 <div className="don-btns">
-<a className="don-btn don-btn--kofi" href="https://ko.fi/doubledown" target="_blank" rel="noopener noreferrer">
+<a className="don-btn don-btn--kofi" href="https://ko-fi.com/queeflatinah" target="_blank" rel="noopener noreferrer">
 ☕ Support on Ko-fi
-<span className="don-tag">0% platform fee · set up at ko.fi</span>
+<span className="don-tag">0% platform fee</span>
 </a>
 <a className="don-btn don-btn--bmc" href="https://buymeacoffee.com/queeflatinah" target="_blank" rel="noopener noreferrer">
 🍺 Buy Me a Tinny
@@ -656,7 +657,7 @@ return (
       {topHouse && <span className="nav-house" title={topHouse.label}>{topHouse.emoji}</span>}
       {!isGuest && <span className="nav-user">{profile.name}</span>}
       {isGuest && <span className="nav-guest">Guest</span>}
-      <a className="nav-donate" href="https://ko.fi/doubledown" target="_blank" rel="noopener noreferrer">☕ Donate</a>
+      <a className="nav-donate" href="https://ko-fi.com/queeflatinah" target="_blank" rel="noopener noreferrer">☕ Donate</a>
       <button className="nav-share" onClick={doShare}>{shared?"✅":"Share"}</button>
     </div>
   </nav>
@@ -829,7 +830,7 @@ return (
         <div className="gdon-lbl">ENJOY THE SATIRE? 🇦🇺</div>
         <div className="gdon-pitch">Milk: $3.50. Avo toast: $24. A tinny: $9. Albo's house: $4.3M.</div>
         <div className="gdon-btns">
-          <a className="gdon-btn" href="https://ko.fi/doubledown" target="_blank" rel="noopener noreferrer">☕ Ko-fi (0% fee)</a>
+          <a className="gdon-btn" href="https://ko-fi.com/queeflatinah" target="_blank" rel="noopener noreferrer">☕ Ko-fi (0% fee)</a>
           <a className="gdon-btn gdon-btn--b" href="https://buymeacoffee.com/queeflatinah" target="_blank" rel="noopener noreferrer">🍺 BMC (5% fee)</a>
         </div>
 
@@ -1008,7 +1009,7 @@ return (
 <nav className="nav">
 <div className="nav-logo">🎲 DOUBLE DOWN</div>
 <div className="nav-r">
-<a className="nav-donate" href="https://ko.fi/doubledown" target="_blank" rel="noopener noreferrer">☕ Donate</a>
+<a className="nav-donate" href="https://ko-fi.com/queeflatinah" target="_blank" rel="noopener noreferrer">☕ Donate</a>
 <button className="nav-share" onClick={doShare}>{shared ? “✅” : “Share”}</button>
 </div>
 </nav>
