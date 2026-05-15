@@ -110,6 +110,33 @@ return (
 );
 }
 
+// ─── REFERRAL SYSTEM ──────────────────────────────────────────────────────────
+function getReferralCode() {
+try { return new URLSearchParams(window.location.search).get(“ref”); } catch { return null; }
+}
+function storeReferrer(code) {
+try { if(code) sessionStorage.setItem(“dd_ref”, code); } catch {}
+}
+function getStoredReferrer() {
+try { return sessionStorage.getItem(“dd_ref”); } catch { return null; }
+}
+function clearReferrer() {
+try { sessionStorage.removeItem(“dd_ref”); } catch {}
+}
+async function creditReferrer(referrerName) {
+try {
+const { data } = await supabase.from(“profiles”).select(”*”).eq(“name”, referrerName).single();
+if (!data) return;
+const newBal = (data.balance||0) + 1_000_000;
+const newCount = (data.referral_count||0) + 1;
+await supabase.from(“profiles”).update({
+balance: newBal,
+referral_count: newCount,
+updated_at: new Date().toISOString()
+}).eq(“name”, referrerName);
+} catch {}
+}
+
 // ─── ITEMS: 1980 vs 2026 ─────────────────────────────────────────────────────
 const ITEMS = [
 { emoji:“🏠”, name:“Sydney House (median)”,  p80:68000,  p26:1650000, unit:”” },
@@ -425,11 +452,19 @@ setLoading(true); setError(””);
 const safe = name.trim().slice(0,20).replace(/[^a-zA-Z0-9_-]/g,””);
 if (!safe) { setError(“Letters, numbers, underscores and dashes only.”); setLoading(false); return; }
 let profile = await loadProfile(safe);
+const isNew = !profile;
 if (!profile) {
 profile = { name:safe, balance:STARTING, flips:0, wins:0, lowestEver:STARTING, createdAt:Date.now(), email:email.trim()||null };
 }
 if (email.trim() && !profile.email) profile.email = email.trim();
 await saveProfile(profile);
+if (isNew) {
+const referrer = getStoredReferrer();
+if (referrer && referrer.toLowerCase() !== safe.toLowerCase()) {
+await creditReferrer(referrer);
+clearReferrer();
+}
+}
 setLoading(false);
 onSignIn(profile);
 }
@@ -464,6 +499,70 @@ return (
 </div>
 ```
 
+);
+}
+
+// ─── SHARE RESET ──────────────────────────────────────────────────────────────
+const SHARE_COOLDOWN = 15 * 60 * 1000; // 15 minutes in ms
+
+function ShareReset({ profile, setProfile, setHist, isGuest, persist }) {
+const [now, setNow] = useState(Date.now());
+useEffect(() => {
+const t = setInterval(() => setNow(Date.now()), 1000);
+return () => clearInterval(t);
+}, []);
+
+const lastReset = profile.lastShareReset || 0;
+const elapsed = now - lastReset;
+const remaining = SHARE_COOLDOWN - elapsed;
+const onCooldown = remaining > 0;
+
+const mins = String(Math.floor(remaining / 60000)).padStart(2,“0”);
+const secs = String(Math.floor((remaining % 60000) / 1000)).padStart(2,“0”);
+
+function doReset(openFn) {
+openFn();
+setTimeout(() => {
+const r = { …profile, balance:100000, flips:0, wins:0, lowestEver:100000, lastShareReset:Date.now() };
+setProfile(r); setHist([]); if(!isGuest) persist(r);
+}, 800);
+}
+
+const platforms = [
+{ label:“𝕏 Twitter”, color:”#1da1f2”, fn:()=>{
+const txt=“I just blew my entire balance on doubledown.au 💸%0AStarting over with $100,000 — someone has to beat Albo’s $4.3M beach house 🏖️🇦🇺%0A%0Adoubledown.au @JEChalmers @AlboMP”;
+window.open(“https://twitter.com/intent/tweet?text=”+txt,”_blank”);
+}},
+{ label:“Facebook”, color:”#1877f2”, fn:()=>{
+window.open(“https://www.facebook.com/sharer/sharer.php?u=https://doubledown.au&quote=I+just+blew+my+entire+balance+on+doubledown.au+Starting+over+with+$100,000”,”_blank”);
+}},
+{ label:“Reddit”, color:”#ff5600”, fn:()=>{
+const title=“I just went broke on a satirical Australian budget coin flip. Restarting with $100,000.”;
+window.open(“https://www.reddit.com/submit?url=https://doubledown.au&title=”+encodeURIComponent(title),”_blank”);
+}},
+];
+
+return (
+<div className="refill-share-box">
+<div className="refill-share-lbl">📤 Share & restart with $100,000</div>
+{onCooldown ? (
+<>
+<div className="refill-share-sub">Next share reset available in</div>
+<div className="cooldown-timer">{mins}:{secs}</div>
+<div className="cooldown-note">Reset to $1,000 above while you wait, or come back in {mins} mins for the big bag.</div>
+</>
+) : (
+<>
+<div className="refill-share-sub">Post on social. Get a bigger bag. Available every 15 mins.</div>
+<div className="refill-social-row">
+{platforms.map(({label,color,fn})=>(
+<button key={label} className=“social-refill-btn” style={{borderColor:color,color}}
+onClick={()=>doReset(fn)}>{label}</button>
+))}
+</div>
+</>
+)}
+</div>
 );
 }
 
@@ -518,6 +617,11 @@ lowestEver: Math.min(profile.lowestEver??STARTING, nb),
 setResult(r); setOutcome(won?“win”:“lose”);
 setProfile(updated);
 setHist(h=>[{r,won,eff},…h.slice(0,11)]);
+// Credit referrer on first ever flip (guest)
+if (isGuest && profile.flips === 0) {
+const referrer = getStoredReferrer();
+if (referrer) { creditReferrer(referrer); clearReferrer(); }
+}
 const rLabel = r===“H” ? “🦅 HEADS” : “🦘 TAILS”;
 setFlipMsg(won
 ? `+$${fmtN(eff)} — ${nb>=ALBO?`🏖️ ${(nb/ALBO).toFixed(1)}× Albo’s house!`:`${rLabel} — you win!`}`
@@ -671,36 +775,7 @@ return (
                 🔄 Reset to $1,000 — Free
               </button>
               <div className="bust-or">— or —</div>
-              <div className="refill-share-box">
-                <div className="refill-share-lbl">📤 Share &amp; restart with $100,000</div>
-                <div className="refill-share-sub">Post on social. Get a bigger bag.</div>
-                <div className="refill-social-row">
-                  {[
-                    {label:"𝕏 Twitter", color:"#1da1f2", fn:()=>{
-                      const txt="I just blew my entire balance on doubledown.au 💸%0AStarting over with $100,000 — someone has to beat Albo's $4.3M beach house 🏖️🇦🇺%0A%0Adoubledown.au @JEChalmers @AlboMP";
-                      window.open("https://twitter.com/intent/tweet?text="+txt,"_blank");
-                    }},
-                    {label:"Facebook", color:"#1877f2", fn:()=>{
-                      window.open("https://www.facebook.com/sharer/sharer.php?u=https://doubledown.au&quote=I+just+blew+my+entire+balance+on+doubledown.au+Starting+over+with+$100,000","_blank");
-                    }},
-                    {label:"Reddit", color:"#ff5600", fn:()=>{
-                      const title="I just went broke on a satirical Australian budget coin flip. Restarting with $100,000.";
-                      window.open("https://www.reddit.com/submit?url=https://doubledown.au&title="+encodeURIComponent(title),"_blank");
-                    }},
-                    {label:"📋 Copy", color:"#B0ADA6", fn:()=>{
-                      navigator.clipboard.writeText("I just blew my entire balance on doubledown.au 💸 Starting over with $100,000 — someone has to beat Albo's $4.3M beach house 🏖️🇦🇺 doubledown.au");
-                    }},
-                  ].map(({label,color,fn})=>(
-                    <button key={label} className="social-refill-btn" style={{borderColor:color,color}} onClick={()=>{
-                      fn();
-                      setTimeout(()=>{
-                        const r={...profile,balance:100000,flips:0,wins:0,lowestEver:100000};
-                        setProfile(r); setHist([]); if(!isGuest)persist(r);
-                      }, 800);
-                    }}>{label}</button>
-                  ))}
-                </div>
-              </div>
+              <ShareReset profile={profile} setProfile={setProfile} setHist={setHist} isGuest={isGuest} persist={persist}/>
             </div>
         : !pick
           ? <div className="flip-hint">👆 Pick heads or tails first</div>
@@ -720,7 +795,36 @@ return (
         </div>
       )}
 
-      {/* GAME DONATE */}
+      {/* REFERRAL */}
+      {!isGuest && (
+        <div className="referral-box">
+          <div className="ref-lbl">💰 REFER A MATE. GET $1,000,000.</div>
+          <div className="ref-sub">When someone plays through your link, you get $1M in credits automatically.</div>
+          <div className="ref-link-row">
+            <div className="ref-link">doubledown.au?ref={profile.name}</div>
+            <button className="ref-copy" onClick={()=>{
+              const url=`https://doubledown.au?ref=${profile.name}`;
+              navigator.clipboard.writeText(url).catch(()=>{});
+              const btn=document.activeElement; btn.textContent="✅"; setTimeout(()=>btn.textContent="Copy",1500);
+            }}>Copy</button>
+          </div>
+          <div className="ref-social-row">
+            <button className="ref-social-btn ref-tw" onClick={()=>{
+              const txt=`I'm playing a satirical coin flip to earn Albo's $4.3M beach house 🏖️%0AUse my link for a free $1,000 start — doubledown.au?ref=${profile.name} 🇦🇺`;
+              window.open("https://twitter.com/intent/tweet?text="+txt,"_blank");
+            }}>𝕏 Tweet</button>
+            <button className="ref-social-btn ref-fb" onClick={()=>{
+              window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent("https://doubledown.au?ref="+profile.name)}`,"_blank");
+            }}>Facebook</button>
+            <button className="ref-social-btn ref-rd" onClick={()=>{
+              window.open(`https://www.reddit.com/submit?url=${encodeURIComponent("https://doubledown.au?ref="+profile.name)}&title=${encodeURIComponent("Play this satirical Australian budget coin flip — earn Albo's $4.3M beach house")}`,"_blank");
+            }}>Reddit</button>
+          </div>
+          {profile.referral_count>0 && <div className="ref-count">🎉 {profile.referral_count} referral{profile.referral_count!==1?"s":""} · +${(profile.referral_count*1000000).toLocaleString("en-AU")} earned</div>}
+        </div>
+      )}
+
+    {/* GAME DONATE */}
       <div className="gdon">
         <div className="gdon-lbl">ENJOY THE SATIRE? 🇦🇺</div>
         <div className="gdon-pitch">Milk: $3.50. Avo toast: $24. A tinny: $9. Albo's house: $4.3M.</div>
@@ -942,7 +1046,7 @@ return (
         <div className="social-share-row">
           <button className="ss-btn ss-tw" onClick={()=>tweet("Jim Chalmers killed the CGT discount and left a $28.3B deficit.\n\nAlbo bought a $4.3M beach house during a cost-of-living crisis.\n\nWe built a coin flip.\n\ndoubledown.au 🪙🇦🇺\n@JEChalmers @AlboMP")}>𝕏 Tweet</button>
           <button className="ss-btn ss-rd" onClick={()=>window.open("https://www.reddit.com/submit?url=https://doubledown.au&title="+encodeURIComponent("We built a coin flip to explain the 2026 budget — your goal is to buy Albo's $4.3M beach house"),"_blank")}>📮 Reddit</button>
-          <button className="ss-btn ss-cp" onClick={doShare}>{shared?"✅":"📋 Copy"}</button>
+
         </div>
       </div>
 
@@ -1130,7 +1234,11 @@ export default function App() {
 const [page, setPage] = useState(“land”);
 const [user, setUser] = useState(null);
 const [isGuest, setIsGuest] = useState(false);
-useEffect(()=>{ injectMeta(); },[]);
+useEffect(()=>{
+injectMeta();
+const ref = getReferralCode();
+if (ref) storeReferrer(ref);
+},[]);
 function handleSignIn(p){ setUser(p); setIsGuest(false); setPage(“game”); }
 function handleGuest(){ setUser({name:“Guest”,balance:STARTING,flips:0,wins:0,lowestEver:STARTING,createdAt:Date.now()}); setIsGuest(true); setPage(“game”); }
 function handleBack(){ setPage(“land”); setUser(null); setIsGuest(false); }
@@ -1182,8 +1290,6 @@ a{color:inherit;}
     .ss-tw:hover{background:rgba(29,161,242,.2);}
     .ss-rd{background:rgba(255,86,0,.1);border-color:rgba(255,86,0,.4);color:#ff5600;}
     .ss-rd:hover{background:rgba(255,86,0,.2);}
-    .ss-cp{background:transparent;border-color:var(--border);color:var(--muted);}
-    .ss-cp:hover{border-color:var(--gold);color:var(--gold);}
     .nav-share,.nav-back{background:transparent;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:6px 12px;border-radius:4px;cursor:pointer;transition:all .15s;}
     .nav-share:hover,.nav-back:hover{border-color:var(--gold);color:var(--gold);}
     .nav-user{font-family:var(--cond);font-size:13px;font-weight:700;color:var(--green2);}
@@ -1531,13 +1637,14 @@ a{color:inherit;}
 
     .stakes-row{display:flex;gap:5px;flex-wrap:wrap;}
     /* BET UI */
-    .bet-display{display:flex;align-items:center;background:#141A12;border:2px solid rgba(232,200,74,.5);border-radius:8px;padding:8px 14px;margin-bottom:10px;gap:6px;}
-    .bet-currency{font-family:var(--cond);font-size:28px;font-weight:900;color:var(--gold);}
-    .bet-input{flex:1;background:transparent;border:none;outline:none;font-family:var(--cond);font-size:36px;font-weight:900;color:#EAE8E0;width:100%;min-width:0;}
+    .bet-display{display:flex;align-items:center;background:#141A12;border:3px solid var(--gold);border-radius:10px;padding:10px 16px;margin-bottom:10px;gap:6px;box-shadow:0 0 24px rgba(232,200,74,.25),inset 0 0 20px rgba(232,200,74,.05);}
+    .bet-currency{font-family:var(--cond);font-size:32px;font-weight:900;color:var(--gold);}
+    .bet-input{flex:1;background:transparent;border:none;outline:none;font-family:var(--cond);font-size:40px;font-weight:900;color:#EAE8E0;width:100%;min-width:0;}
     .bet-input::-webkit-inner-spin-button,.bet-input::-webkit-outer-spin-button{-webkit-appearance:none;}
     .bet-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;}
-    .bp-btn{padding:9px 4px;border-radius:5px;border:1.5px solid rgba(234,232,224,.18);background:transparent;color:#B0ADA6;font-family:var(--cond);font-size:14px;font-weight:700;cursor:pointer;transition:all .12s;}
-    .bp-btn:hover,.bp-btn--on{border-color:var(--gold);color:var(--gold);background:rgba(232,200,74,.08);}
+    .bp-btn{padding:10px 4px;border-radius:6px;border:1.5px solid rgba(234,232,224,.2);background:rgba(255,255,255,.03);color:#B0ADA6;font-family:var(--cond);font-size:15px;font-weight:700;cursor:pointer;transition:all .12s;}
+    .bp-btn:hover{border-color:rgba(232,200,74,.5);color:var(--gold);background:rgba(232,200,74,.06);}
+    .bp-btn--on{border-color:var(--gold);color:#080C0A;background:var(--gold);font-weight:900;}
     .bet-adj{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;}
     .adj-btn{padding:7px 11px;border-radius:5px;border:1px solid rgba(234,232,224,.14);background:transparent;color:#B0ADA6;font-family:var(--mono);font-size:11px;cursor:pointer;transition:all .12s;flex:1;}
     .adj-btn:hover{border-color:rgba(232,200,74,.4);color:var(--gold);}
@@ -1547,7 +1654,7 @@ a{color:inherit;}
     .cust-inp{width:100%;background:#141A12;border:1.5px solid rgba(234,232,224,.2);border-radius:5px;padding:7px 10px;color:#EAE8E0;font-family:var(--mono);font-size:12px;outline:none;transition:border .12s;}
     .cust-inp:focus{border-color:var(--gold);}
     .cust-inp::placeholder{color:rgba(234,232,224,.45);}
-    .flip-btn{width:100%;padding:14px;background:var(--green);border:none;color:#fff;font-family:var(--cond);font-weight:900;font-size:17px;letter-spacing:.05em;border-radius:7px;cursor:pointer;transition:all .15s;box-shadow:0 4px 14px rgba(27,122,68,.35);}
+    .flip-btn{width:100%;padding:16px;background:var(--green);border:3px solid var(--green2);color:#fff;font-family:var(--cond);font-weight:900;font-size:18px;letter-spacing:.06em;border-radius:8px;cursor:pointer;transition:all .15s;box-shadow:0 6px 24px rgba(27,122,68,.5);}
     .flip-btn:hover:not(:disabled){background:var(--green2);transform:translateY(-1px);}
     .flip-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
     .flip-hint{width:100%;padding:14px;text-align:center;color:#B0ADA6;font-family:var(--cond);font-size:15px;font-weight:700;border:2px dashed rgba(234,232,224,.15);border-radius:7px;letter-spacing:.05em;}
@@ -1561,6 +1668,8 @@ a{color:inherit;}
     .refill-btn--share:hover{background:rgba(232,200,74,.22);}
     .refill-tag{font-size:10px;font-weight:400;opacity:.75;font-family:var(--mono);letter-spacing:0;}
     .bust-or{font-size:11px;color:#7E7C77;margin:10px 0;letter-spacing:.1em;}
+    .cooldown-timer{font-family:var(--cond);font-size:48px;font-weight:900;color:var(--gold);letter-spacing:.05em;margin:8px 0;}
+    .cooldown-note{font-size:10px;color:#7E7C77;line-height:1.6;margin-top:6px;}
     .refill-share-box{background:rgba(232,200,74,.06);border:1.5px solid rgba(232,200,74,.25);border-radius:8px;padding:14px;text-align:center;}
     .refill-share-lbl{font-family:var(--cond);font-size:16px;font-weight:900;color:var(--gold);margin-bottom:3px;}
     .refill-share-sub{font-size:10px;color:#7E7C77;margin-bottom:12px;letter-spacing:.05em;}
@@ -1573,6 +1682,19 @@ a{color:inherit;}
     .chip-w{border-color:#4ade80;color:#4ade80;}
     .chip-l{border-color:var(--red);color:var(--red);}
 
+    /* REFERRAL */
+    .referral-box{background:rgba(232,200,74,.06);border:1.5px solid rgba(232,200,74,.3);border-radius:8px;padding:14px;}
+    .ref-lbl{font-family:var(--cond);font-size:14px;font-weight:900;color:var(--gold);letter-spacing:.04em;margin-bottom:4px;}
+    .ref-sub{font-size:10px;color:#A8A5A0;line-height:1.5;margin-bottom:10px;}
+    .ref-link-row{display:flex;gap:6px;align-items:center;margin-bottom:8px;}
+    .ref-link{flex:1;background:#080C0A;border:1px solid rgba(232,200,74,.2);border-radius:5px;padding:7px 9px;font-family:var(--mono);font-size:10px;color:var(--gold);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .ref-copy{padding:7px 12px;background:var(--gold);border:none;color:#080C0A;font-family:var(--cond);font-size:12px;font-weight:900;border-radius:5px;cursor:pointer;flex-shrink:0;}
+    .ref-social-row{display:flex;gap:6px;margin-bottom:8px;}
+    .ref-social-btn{flex:1;padding:8px 4px;border-radius:5px;border:1.5px solid;background:transparent;font-family:var(--cond);font-size:12px;font-weight:700;cursor:pointer;transition:all .12s;}
+    .ref-tw{border-color:rgba(29,161,242,.4);color:#1da1f2;}
+    .ref-fb{border-color:rgba(24,119,242,.4);color:#1877f2;}
+    .ref-rd{border-color:rgba(255,86,0,.4);color:#ff5600;}
+    .ref-count{font-size:11px;color:var(--green2);font-family:var(--cond);font-weight:700;text-align:center;}
     /* GAME DONATE */
     .gdon{background:rgba(232,200,74,.04);border:1px solid rgba(232,200,74,.1);border-radius:6px;padding:11px;}
     .gdon-lbl{font-size:8px;letter-spacing:.2em;color:var(--muted);margin-bottom:5px;}
