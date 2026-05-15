@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from “react”;
-import { supabase } from ‘./supabase.js’;
 
 // ─── SEO ─────────────────────────────────────────────────────────────────────
 function injectMeta() {
-document.title = “Two-Up Treasury | Start with $1,000. Beat the Budget.”;
+document.title = “Double Down | Beat Albo’s $4.3M Beach House — One Flip At A Time”;
 [
-[“description”,“Two-Up Treasury: Satirical play-credit coin flip. $1,000 to start. Global leaderboard. Badges. See what your money bought in 1980 vs now.”],
-[“og:title”,“Two-Up Treasury | Ignore CGT. Double Down. Don’t Pay A Cent.”],
+[“description”,“Double Down: Australia’s most ambitious coin flip. $1,000 to start. Global leaderboard. Badges. See what your money bought in 1980 vs now.”],
+[“og:title”,“Double Down | Ignore CGT. Flip a Coin. Don’t Pay A Cent.”],
 [“og:description”,“Start with $1,000 in play credits. Flip coins. Earn badges. Climb the leaderboard. Jim Chalmers bought a $4.3M beach house. Beat him.”],
 [“keywords”,“Australia budget satire, coin flip game, 1980 prices Australia, Albanese house, leaderboard, play credits, Jim Chalmers, two-up, badges”],
 ].forEach(([k,v]) => {
@@ -14,6 +13,9 @@ const m = document.createElement(“meta”);
 m.setAttribute(k.includes(“og:”) ? “property” : “name”, k);
 m.content = v; document.head.appendChild(m);
 });
+const can = document.createElement(“link”);
+can.rel = “canonical”; can.href = “https://doubledown.au”;
+document.head.appendChild(can);
 }
 
 // ─── BADGE DEFINITIONS ────────────────────────────────────────────────────────
@@ -43,6 +45,25 @@ return BADGES.filter(b => b.check(profile));
 function getHighestHouseBadge(profile) {
 const houses = BADGES.filter(b => b.id.startsWith(“albo”) && b.check(profile));
 return houses.length ? houses[houses.length - 1] : null;
+}
+
+// ─── LIVE DEFICIT COUNTER ─────────────────────────────────────────────────────
+// $28.3B deficit / 365 days / 24h / 3600s = ~$897/second
+function DeficitCounter() {
+const BASE = 28_300_000_000;
+const PER_SEC = 897;
+const [count, setCount] = useState(BASE);
+useEffect(() => {
+const t = setInterval(() => setCount(n => n + PER_SEC), 1000);
+return () => clearInterval(t);
+}, []);
+return (
+<div className="deficit-bar">
+<span className="deficit-label">🇦🇺 NATIONAL DEFICIT — LIVE</span>
+<span className="deficit-num">${count.toLocaleString(“en-AU”)}</span>
+<span className="deficit-sub">+$897 every second · Jim Chalmers calls this “an improvement”</span>
+</div>
+);
 }
 
 // ─── ITEMS: 1980 vs 2026 ─────────────────────────────────────────────────────
@@ -81,45 +102,35 @@ return `${Math.floor(s/3600)}h`;
 };
 const STARTING = 1000;
 
-// ─── SUPABASE DATA LAYER ─────────────────────────────────────────────────────
+// ─── STORAGE ─────────────────────────────────────────────────────────────────
+async function sGet(key, shared=false) {
+try { const r = await window.storage.get(key, shared); return r?.value ? JSON.parse(r.value) : null; }
+catch { return null; }
+}
+async function sSet(key, val, shared=false) {
+try { await window.storage.set(key, JSON.stringify(val), shared); } catch {}
+}
 async function getLeaderboard() {
-try {
-const { data } = await supabase
-.from(‘leaderboard’)
-.select(’*’)
-.order(‘balance’, { ascending: false })
-.limit(50);
-return data || [];
-} catch { return []; }
+const d = await sGet(“lb-v5”, true);
+return Array.isArray(d) ? d : [];
 }
-
-async function loadProfile(name) {
-try {
-const { data } = await supabase
-.from(‘profiles’)
-.select(’*’)
-.eq(‘name’, name)
-.single();
-return data || null;
-} catch { return null; }
+async function updateLeaderboard(entry) {
+const lb = await getLeaderboard();
+const idx = lb.findIndex(e => e.name === entry.name);
+if (idx >= 0) lb[idx] = { …lb[idx], …entry };
+else lb.push(entry);
+lb.sort((a,b) => b.balance - a.balance);
+await sSet(“lb-v5”, lb.slice(0,50), true);
 }
-
+async function loadProfile(name) { return sGet(`prof-${name}`, false); }
 async function saveProfile(p) {
-try {
+await sSet(`prof-${p.name}`, p, false);
 const earned = getEarnedBadges(p);
 const topHouse = getHighestHouseBadge(p);
-await supabase.from(‘profiles’).upsert({
-name: p.name, balance: p.balance, flips: p.flips,
-wins: p.wins, lowest_ever: p.lowestEver ?? p.balance,
-created_at: new Date(p.createdAt).toISOString()
-}, { onConflict: ‘name’ });
-await supabase.from(‘leaderboard’).upsert({
+await updateLeaderboard({
 name: p.name, balance: p.balance, flips: p.flips, wins: p.wins,
-badge_count: earned.length,
-top_house_emoji: topHouse?.emoji || null,
-updated_at: new Date().toISOString()
-}, { onConflict: ‘name’ });
-} catch(e) { console.error(‘saveProfile error’, e); }
+badgeCount: earned.length, topHouseEmoji: topHouse?.emoji || null, ts: Date.now()
+});
 }
 
 // ─── BADGE STRIP ─────────────────────────────────────────────────────────────
@@ -171,12 +182,7 @@ function Leaderboard({ currentUser, compact }) {
 const [lb, setLb] = useState([]);
 const [loading, setLoading] = useState(true);
 const load = useCallback(async () => {
-const d = await getLeaderboard();
-setLb(d.map(e => ({
-name: e.name, balance: e.balance, flips: e.flips,
-wins: e.wins, badgeCount: e.badge_count, topHouseEmoji: e.top_house_emoji
-})));
-setLoading(false);
+const d = await getLeaderboard(); setLb(d); setLoading(false);
 }, []);
 useEffect(() => { load(); const t = setInterval(load,8000); return ()=>clearInterval(t); }, [load]);
 
@@ -213,17 +219,8 @@ const [text, setText] = useState(””);
 const [posting, setPosting] = useState(false);
 const endRef = useRef(null);
 const load = useCallback(async () => {
-try {
-const { data } = await supabase
-.from(‘chat_messages’)
-.select(’*’)
-.order(‘created_at’, { ascending: true })
-.limit(80);
-if (data) setMsgs(data.map(m => ({
-id: m.id, handle: m.handle, text: m.text,
-ts: new Date(m.created_at).getTime()
-})));
-} catch {}
+const d = await sGet(“chat-v5”, true);
+if (Array.isArray(d)) setMsgs(d);
 }, []);
 useEffect(() => { load(); const t=setInterval(load,5000); return ()=>clearInterval(t); }, [load]);
 useEffect(() => { endRef.current?.scrollIntoView({behavior:“smooth”}); }, [msgs]);
@@ -231,11 +228,11 @@ useEffect(() => { endRef.current?.scrollIntoView({behavior:“smooth”}); }, [m
 async function post() {
 if (!text.trim()||posting) return;
 setPosting(true);
-try {
-await supabase.from(‘chat_messages’).insert({ handle, text: text.trim() });
-await load();
-} catch {}
-setText(””); setPosting(false);
+const m = {id:Date.now(), handle, text:text.trim(), ts:Date.now()};
+const cur = await sGet(“chat-v5”,true) || [];
+const updated = […(Array.isArray(cur)?cur:[]).slice(-79), m];
+await sSet(“chat-v5”, updated, true);
+setMsgs(updated); setText(””); setPosting(false);
 }
 
 return (
@@ -395,7 +392,7 @@ onSignIn(profile);
 return (
 <div className="auth-page">
 <div className="auth-logo">🪙</div>
-<h1 className="auth-h1">TWO-UP TREASURY</h1>
+<h1 className="auth-h1">DOUBLE DOWN</h1>
 <p className="auth-sub">Australia’s most straightforward financial instrument.<br/>Heads or tails. $1,000 to start. Leaderboard. Badges.</p>
 <div className="auth-card">
 <div className="auth-s">
@@ -484,8 +481,8 @@ setTimeout(()=>setPhase(“idle”),600);
 async function doShare() {
 const earned = getEarnedBadges(profile);
 const topHouse = getHighestHouseBadge(profile);
-const txt = `I've got $${fmtN(profile.balance)} on Two-Up Treasury${topHouse?` and earned ${topHouse.label}`:""}. Albo paid $4.3M for a beach house during a cost-of-living crisis. ${earned.length} badges. Come flip. 🪙🇦🇺 https://two-up-treasury.com.au`;
-try { await navigator.share({title:“Two-Up Treasury”,text:txt}); }
+const txt = `I've got $${fmtN(profile.balance)} on Double Down${topHouse?` and earned ${topHouse.label}`:""}. Albo paid $4.3M for a beach house during a cost-of-living crisis. ${earned.length} badges. Come flip. 🪙🇦🇺 https://doubledown.au`;
+try { await navigator.share({title:“Double Down”,text:txt}); }
 catch { navigator.clipboard.writeText(txt).catch(()=>{}); }
 setShared(true); setTimeout(()=>setShared(false),2000);
 }
@@ -504,10 +501,12 @@ return (
       {topHouse && <span className="nav-house" title={topHouse.label}>{topHouse.emoji}</span>}
       {!isGuest && <span className="nav-user">{profile.name}</span>}
       {isGuest && <span className="nav-guest">Guest</span>}
+      <a className="nav-donate" href="https://ko.fi/doubledown" target="_blank" rel="noopener noreferrer">☕ Donate</a>
       <button className="nav-share" onClick={doShare}>{shared?"✅":"Share"}</button>
     </div>
   </nav>
 
+  <DeficitCounter/>
   <div className="mob-tabs">
     {["flip","board","chat"].map(t=>(
       <button key={t} className={`mob-tab${tab===t?" mob-tab--on":""}`} onClick={()=>setTab(t)}>
@@ -633,8 +632,8 @@ return (
 function Landing({ onPlay }) {
 const [shared, setShared] = useState(false);
 async function doShare() {
-const t=“Two-Up Treasury — Start with $1,000. Earn badges. Beat Albo’s $4.3M beach house. 🪙🇦🇺 https://two-up-treasury.com.au”;
-try { await navigator.share({title:“Two-Up Treasury”,text:t,url:“https://two-up-treasury.com.au”}); }
+const t=“Double Down — Start with $1,000. Earn badges. Beat Albo’s $4.3M beach house. 🪙🇦🇺 https://doubledown.au”;
+try { await navigator.share({title:“Double Down”,text:t,url:“https://doubledown.au”}); }
 catch { navigator.clipboard.writeText(t).catch(()=>{}); }
 setShared(true); setTimeout(()=>setShared(false),2000);
 }
@@ -642,17 +641,17 @@ setShared(true); setTimeout(()=>setShared(false),2000);
 return (
 <div className="land">
 <nav className="nav">
-<div className="nav-logo">🪙 TWO-UP TREASURY</div>
+<div className="nav-logo">🎲 DOUBLE DOWN</div>
 <div className="nav-r">
-<span className="nav-tag">EST. BUDGET NIGHT 2026</span>
-<button className="nav-share" onClick={doShare}>{shared?“✅ Copied”:“Share”}</button>
+<a className="nav-donate" href="https://ko.fi/doubledown" target="_blank" rel="noopener noreferrer">☕ Donate</a>
+<button className="nav-share" onClick={doShare}>{shared?“✅”:“Share”}</button>
 </div>
 </nav>
 
 ```
   {/* HERO */}
   <section className="hero">
-    <div className="hero-eye">SATIRICAL PLAY-CREDIT COIN FLIP · EST. BUDGET NIGHT 2026 · 🇦🇺</div>
+    <div className="hero-eye">🇦🇺 PLAY FREE · doubledown.au · 🇦🇺</div>
     <h1 className="hero-h1">Ignore CGT.<br/><em>Double Down.</em><br/>Don't Pay A Cent.</h1>
     <p className="hero-p">
       Jim Chalmers killed the CGT discount and left a $28.3 billion deficit. Anthony Albanese
@@ -671,6 +670,7 @@ return (
       <span className="hbadge">🏖️ Beat Albo's $4.3M House</span>
     </div>
   </section>
+  <DeficitCounter/>
 
   {/* ALBO GOAL */}
   <section className="albo-section">
@@ -741,7 +741,7 @@ return (
   </section>
 
   <footer className="footer">
-    <div className="ft-logo">🪙 TWO-UP TREASURY</div>
+    <div className="ft-logo">🎲 DOUBLE DOWN</div>
     <div className="ft-links">
       <button onClick={onPlay}>Play →</button>
       <button onClick={doShare}>Share</button>
@@ -750,7 +750,7 @@ return (
       Satire. Play credits only. No real gambling or payments of any kind. Not financial, tax, or legal advice.
       Not endorsed by Jim Chalmers, Anthony Albanese, the ATO, the RBA, or any kangaroo.
       Gambling Help Online: <strong>1800 858 858</strong>.
-      Two-Up Treasury Pty Ltd (ACN: 420-069-666) · 🇦🇺 Australia · 2026
+      Double Down Pty Ltd (ACN: 420-069-666) · 🇦🇺 Australia · 2026
     </div>
   </footer>
 </div>
@@ -798,6 +798,11 @@ a{color:inherit;}
     .nav-r{display:flex;align-items:center;gap:8px;}
     .nav-tag{font-size:9px;letter-spacing:.15em;color:var(--muted);display:none;}
     @media(min-width:600px){.nav-tag{display:inline;}}
+    .deficit-bar{background:rgba(220,53,40,.08);border-bottom:1px solid rgba(220,53,40,.2);padding:8px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+    .deficit-label{font-size:9px;letter-spacing:.2em;color:var(--red);font-family:var(--mono);}
+    .deficit-num{font-family:var(--cond);font-size:22px;font-weight:900;color:var(--red);letter-spacing:.02em;}
+    .deficit-sub{font-size:9px;color:var(--muted);font-style:italic;}
+            .nav-donate{background:var(--gold);color:#080C0A;font-family:var(--cond);font-weight:800;font-size:12px;padding:6px 12px;border-radius:4px;text-decoration:none;}
     .nav-share,.nav-back{background:transparent;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:6px 12px;border-radius:4px;cursor:pointer;transition:all .15s;}
     .nav-share:hover,.nav-back:hover{border-color:var(--gold);color:var(--gold);}
     .nav-user{font-family:var(--cond);font-size:13px;font-weight:700;color:var(--green2);}
