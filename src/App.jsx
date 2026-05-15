@@ -648,121 +648,347 @@ return (
 );
 }
 
+// ─── CARICATURES (CC-style satirical illustrations) ──────────────────────────
+function AlboCaricature() {
+return (
+<svg viewBox="0 0 180 240" className="caric" aria-label="Satirical caricature of Anthony Albanese" role="img">
+{/* Sky */}
+<rect width="180" height="240" fill="#87CEEB"/>
+{/* Ocean */}
+<rect y="175" width="180" height="65" fill="#1565C0"/>
+<rect y="175" width="180" height="12" fill="#1E88E5" opacity=".5"/>
+{/* Copacabana cliff */}
+<ellipse cx="90" cy="200" rx="100" ry="30" fill="#5D4037"/>
+{/* House on cliff */}
+<rect x="50" y="158" width="80" height="45" fill="#FFFDE7" rx="2"/>
+<polygon points="40,158 90,128 140,158" fill="#E53935"/>
+<rect x="76" y="177" width="14" height="26" fill="#90CAF9"/>
+<text x="90" y="172" textAnchor="middle" fontSize="7" fill="#B71C1C" fontWeight="bold">$4.3M</text>
+{/* Body - Labor red suit */}
+<rect x="55" y="138" width="70" height="40" fill="#C62828" rx="6"/>
+{/* Collar / white shirt */}
+<polygon points="90,138 82,152 90,148 98,152" fill="white"/>
+{/* ALP badge */}
+<circle cx="70" cy="148" r="5" fill="#C62828" stroke="white" strokeWidth="1"/>
+<text x="70" y="151" textAnchor="middle" fontSize="5" fill="white" fontWeight="bold">ALP</text>
+{/* Neck */}
+<rect x="82" y="125" width="16" height="16" fill="#D2956A" rx="4"/>
+{/* Head - round, prominent ears */}
+<ellipse cx="90" cy="100" rx="42" ry="48" fill="#D2956A"/>
+{/* Big ears */}
+<ellipse cx="48" cy="102" rx="13" ry="17" fill="#D2956A"/>
+<ellipse cx="48" cy="102" rx="8" ry="11" fill="#C4845A"/>
+<ellipse cx="132" cy="102" rx="13" ry="17" fill="#D2956A"/>
+<ellipse cx="132" cy="102" rx="8" ry="11" fill="#C4845A"/>
+{/* Silver hair */}
+<path d="M50,72 Q90,42 130,72 Q125,58 90,52 Q55,58 50,72" fill="#9E9E9E"/>
+<path d="M50,72 Q45,85 48,95" fill="none" stroke="#9E9E9E" strokeWidth="8" strokeLinecap="round"/>
+<path d="M130,72 Q135,85 132,95" fill="none" stroke="#9E9E9E" strokeWidth="8" strokeLinecap="round"/>
+{/* Eyes - friendly but guilty */}
+<ellipse cx="78" cy="95" rx="9" ry="10" fill="white"/>
+<ellipse cx="102" cy="95" rx="9" ry="10" fill="white"/>
+<circle cx="80" cy="97" r="5" fill="#3E2723"/>
+<circle cx="104" cy="97" r="5" fill="#3E2723"/>
+<circle cx="82" cy="95" r="2" fill="white"/>
+<circle cx="106" cy="95" r="2" fill="white"/>
+{/* Raised eyebrows - surprised expression */}
+<path d="M70,83 Q78,78 87,82" fill="none" stroke="#5D4037" strokeWidth="2.5" strokeLinecap="round"/>
+<path d="M93,82 Q102,78 110,83" fill="none" stroke="#5D4037" strokeWidth="2.5" strokeLinecap="round"/>
+{/* Wide grin */}
+<path d="M72,118 Q90,136 108,118" fill="#7B3F00" stroke="#5D4037" strokeWidth="1"/>
+<path d="M72,118 Q90,130 108,118" fill="white"/>
+{/* Caption */}
+<rect x="0" y="218" width="180" height="22" fill="rgba(0,0,0,.6)"/>
+<text x="90" y="233" textAnchor="middle" fontSize="9" fill="white" fontFamily="monospace" fontWeight="bold">“I KNOW WHAT IT’S LIKE”</text>
+</svg>
+);
+}
+
+function ChalmersCaricature() {
+return (
+<svg viewBox="0 0 180 240" className="caric" aria-label="Satirical caricature of Jim Chalmers" role="img">
+{/* Dark parliament backdrop */}
+<rect width="180" height="240" fill="#1A237E"/>
+{/* Parliament pillars */}
+<rect x="10" y="60" width="20" height="180" fill="#283593"/>
+<rect x="150" y="60" width="20" height="180" fill="#283593"/>
+<rect x="0" y="55" width="180" height="15" fill="#283593"/>
+{/* Budget papers scattered */}
+<rect x="20" y="180" width="140" height="60" fill="#E8EAF6" rx="3"/>
+<text x="90" y="200" textAnchor="middle" fontSize="8" fill="#C62828" fontWeight="bold">DEFICIT: $28.3B</text>
+<text x="90" y="212" textAnchor="middle" fontSize="7" fill="#37474F">“AN IMPROVEMENT”</text>
+<text x="90" y="224" textAnchor="middle" fontSize="6" fill="#78909C">-Jim Chalmers, probably</text>
+{/* Body - navy suit, Budget night */}
+<rect x="52" y="138" width="76" height="45" fill="#1A237E" rx="6"/>
+{/* Red Labor tie */}
+<polygon points="90,140 85,158 90,155 95,158" fill="#E53935"/>
+{/* Collar */}
+<rect x="83" y="138" width="14" height="10" fill="white"/>
+{/* Neck */}
+<rect x="81" y="124" width="18" height="17" fill="#D4A574" rx="4"/>
+{/* Head - square jaw, distinguished */}
+<ellipse cx="90" cy="96" rx="40" ry="44" fill="#D4A574"/>
+{/* Square jawline */}
+<rect x="62" y="110" width="56" height="20" fill="#D4A574" rx="4"/>
+{/* Ears */}
+<ellipse cx="50" cy="98" rx="11" ry="14" fill="#D4A574"/>
+<ellipse cx="130" cy="98" rx="11" ry="14" fill="#D4A574"/>
+{/* Brown hair - receding slightly */}
+<path d="M52,68 Q90,48 128,68 Q120,55 90,50 Q60,55 52,68" fill="#4E342E"/>
+<path d="M52,68 Q50,78 52,90" fill="none" stroke="#4E342E" strokeWidth="7" strokeLinecap="round"/>
+<path d="M128,68 Q130,78 128,90" fill="none" stroke="#4E342E" strokeWidth="7" strokeLinecap="round"/>
+{/* Confident eyes */}
+<ellipse cx="76" cy="92" rx="9" ry="9" fill="white"/>
+<ellipse cx="104" cy="92" rx="9" ry="9" fill="white"/>
+<circle cx="78" cy="93" r="5" fill="#1A237E"/>
+<circle cx="106" cy="93" r="5" fill="#1A237E"/>
+<circle cx="80" cy="91" r="2" fill="white"/>
+<circle cx="108" cy="91" r="2" fill="white"/>
+{/* Smug eyebrows */}
+<path d="M68,80 Q76,76 84,80" fill="none" stroke="#4E342E" strokeWidth="2.5" strokeLinecap="round"/>
+<path d="M96,80 Q104,76 112,80" fill="none" stroke="#4E342E" strokeWidth="2.5" strokeLinecap="round"/>
+{/* Self-satisfied smile */}
+<path d="M74,116 Q90,128 106,116" fill="#A0522D" stroke="#8B4513" strokeWidth="1"/>
+<path d="M74,116 Q90,122 106,116" fill="white"/>
+{/* CGT crossed out badge */}
+<circle cx="68" cy="150" r="8" fill="#E53935"/>
+<text x="68" y="153" textAnchor="middle" fontSize="5" fill="white" fontWeight="bold">CGT</text>
+<line x1="61" y1="143" x2="75" y2="157" stroke="white" strokeWidth="2"/>
+{/* Caption */}
+<rect x="0" y="218" width="180" height="22" fill="rgba(0,0,0,.6)"/>
+<text x="90" y="233" textAnchor="middle" fontSize="9" fill="white" fontFamily="monospace" fontWeight="bold">“MOST AMBITIOUS BUDGET”</text>
+</svg>
+);
+}
+
 // ─── LANDING ──────────────────────────────────────────────────────────────────
 function Landing({ onPlay }) {
+const [tab, setTab] = useState(“play”);
 const [shared, setShared] = useState(false);
+
 async function doShare() {
-const t=“Double Down — Start with $1,000. Earn badges. Beat Albo’s $4.3M beach house. 🪙🇦🇺 https://doubledown.au”;
-try { await navigator.share({title:“Double Down”,text:t,url:“https://doubledown.au”}); }
+const t = “Jim Chalmers killed the CGT discount & left a $28.3B deficit. Albo bought a $4.3M beach house. We built a coin flip. 🪙🇦🇺 https://doubledown.au”;
+try { await navigator.share({ title:“Double Down”, text:t, url:“https://doubledown.au” }); }
 catch { navigator.clipboard.writeText(t).catch(()=>{}); }
-setShared(true); setTimeout(()=>setShared(false),2000);
+setShared(true); setTimeout(()=>setShared(false), 2500);
 }
+
+function tweet(text) {
+window.open(“https://twitter.com/intent/tweet?text=” + encodeURIComponent(text), “_blank”);
+}
+
+const TABS = [
+{ id:“play”,    icon:“🎲”, label:“Play” },
+{ id:“budget”,  icon:“📉”, label:“Budget” },
+{ id:“albo”,    icon:“🏖️”, label:“Albo’s House” },
+{ id:“prices”,  icon:“🕰️”, label:“1980 vs Now” },
+{ id:“board”,   icon:“🏆”, label:“Leaderboard” },
+{ id:“donate”,  icon:“☕”, label:“Donate” },
+];
 
 return (
 <div className="land">
+{/* STICKY NAV */}
 <nav className="nav">
 <div className="nav-logo">🎲 DOUBLE DOWN</div>
 <div className="nav-r">
 <a className="nav-donate" href="https://ko.fi/doubledown" target="_blank" rel="noopener noreferrer">☕ Donate</a>
-<button className="nav-share" onClick={doShare}>{shared?“✅”:“Share”}</button>
+<button className="nav-share" onClick={doShare}>{shared ? “✅” : “Share”}</button>
 </div>
 </nav>
 
 ```
-  {/* HERO */}
-  <section className="hero">
-    <div className="hero-eye">🇦🇺 PLAY FREE · doubledown.au · 🇦🇺</div>
-    <h1 className="hero-h1">Ignore CGT.<br/><em>Double Down.</em><br/>Don't Pay A Cent.</h1>
-    <p className="hero-p">
-      Jim Chalmers killed the CGT discount and left a $28.3 billion deficit. Anthony Albanese
-      bought a <strong>$4.3 million beach house</strong> during a cost-of-living crisis and said
-      "I know what it's like to struggle." We built a coin flip. $1,000 to start. Earn badges.
-      Climb the leaderboard.
-    </p>
-    <div className="hero-ctas">
-      <button className="cta" onClick={onPlay}>🎲 Play Free — Start with $1,000 →</button>
-    </div>
-    <div className="social-share-row">
-      <button className="ss-btn ss-tw" onClick={()=>{window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent("Jim Chalmers killed the CGT discount and left a $28.3B deficit. Albo bought a $4.3M beach house. We built a coin flip. 🪙🇦🇺\n\ndoubledown.au @JEChalmers @AlboMP"),"_blank");}}>𝕏 Tweet This</button>
-      <button className="ss-btn ss-rd" onClick={()=>{window.open("https://www.reddit.com/submit?url=https://doubledown.au&title="+encodeURIComponent("We built a coin flip to explain the 2026 budget — your goal is to earn enough to buy Albo's $4.3M beach house"),"_blank");}}>📮 Post to Reddit</button>
-      <button className="ss-btn ss-cp" onClick={doShare}>{shared?"✅ Copied!":"📋 Copy Link"}</button>
-    </div>
-    <div className="hero-badges">
-      <span className="hbadge">🪙 Play Credits Only</span>
-      <span className="hbadge">🏆 Global Leaderboard</span>
-      <span className="hbadge">🏅 {BADGES.length} Badges to Earn</span>
-      <span className="hbadge">🏖️ Beat Albo's $4.3M House</span>
-    </div>
-  </section>
+  {/* LIVE DEFICIT TICKER */}
   <DeficitCounter/>
 
-  {/* ALBO GOAL */}
-  <section className="albo-section">
-    <div className="albo-sec-inner">
-      <div className="albo-sec-em">🏖️</div>
-      <div>
-        <div className="albo-sec-title">YOUR GOAL: $4,300,000</div>
-        <div className="albo-sec-sub">Albanese paid $4.3 million for a Copacabana clifftop house — four bedrooms, three bathrooms, "uninterrupted ocean and Sydney skyline views" — while Australians struggled with rent, mortgages and grocery bills. Every multiple of $4.3M you accrue earns you a 🏖️ beach house badge on your profile.</div>
-      </div>
-    </div>
-  </section>
+  {/* TAB BAR */}
+  <div className="ltabs">
+    {TABS.map(t => (
+      <button key={t.id} className={`ltab${tab===t.id?" ltab--on":""}`} onClick={()=>setTab(t.id)}>
+        <span className="ltab-icon">{t.icon}</span>
+        <span className="ltab-lbl">{t.label}</span>
+      </button>
+    ))}
+  </div>
 
-  {/* BADGES PREVIEW */}
-  <section className="section">
-    <div className="section-inner">
-      <div className="section-lbl">BADGES — {BADGES.length} TO EARN</div>
-      <div className="section-desc">Awarded automatically as your play balance grows. House badges appear on your leaderboard profile.</div>
-      <div className="all-badges">
-        {BADGES.map(b=>(
-          <div key={b.id} className="badge-preview">
-            <div className="bp-big-em">{b.emoji}</div>
-            <div className="bp-title">{b.label}</div>
-            <div className="bp-d">{b.desc}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  {/* 1980 CALCULATOR */}
-  <section className="section section--dark">
-    <div className="section-inner">
-      <div className="section-lbl">WHAT YOUR MONEY ACTUALLY BUYS — 1980 vs 2026</div>
-      <div className="section-desc">A beer cost 65 cents. Rent was $55 a week. Uni was free. Albo's beach house didn't exist as a concept. Now it does. It costs $4.3 million.</div>
-      <Calc1980/>
-    </div>
-  </section>
-
-  {/* DONATIONS */}
-  <Donations/>
-
-  {/* TOP 5 */}
-  <section className="section">
-    <div className="section-inner">
-      <div className="section-lbl">THE FIVE TRUTHS THEY WON'T TELL YOU</div>
-      {[
-        "Jim Chalmers bet your CGT discount on red. It landed on black. We let you pick the colour.",
-        "Albanese said 'I know what it's like to struggle.' Then bought a $4.3M clifftop. We said nothing. We just built a leaderboard.",
-        "Four years to see your tax cuts. Four seconds to flip for yours.",
-        "The Treasurer says the deficit 'improved by $8.5 billion.' It's still $28.3B. We'll take that bet.",
-        "Two-up: Australia's oldest financial instrument. Older than negative gearing. More reliable than Labor.",
-      ].map((q,i)=>(
-        <div className="joke" key={i}>
-          <span className="joke-n">0{i+1}</span>
-          <q className="joke-q">"{q}"</q>
+  {/* ── PLAY TAB ── */}
+  {tab==="play" && (
+    <div className="tc">
+      <div className="hero">
+        <div className="hero-eye">🇦🇺 FREE · SATIRICAL · PLAY CREDITS ONLY</div>
+        <h1 className="hero-h1">Ignore CGT.<br/><em>Double Down.</em><br/>Don't Pay A Cent.</h1>
+        <p className="hero-p">
+          Chalmers axed your CGT discount. Albo bought a <strong>$4.3M beach house</strong> during a cost-of-living crisis.<br/>
+          We built Australia's most financially irresponsible coin flip. <strong>$1,000 to start. Free forever.</strong>
+        </p>
+        <button className="cta cta--big" onClick={onPlay}>🎲 Play Free — Start with $1,000 →</button>
+        <div className="social-share-row">
+          <button className="ss-btn ss-tw" onClick={()=>tweet("Jim Chalmers killed the CGT discount and left a $28.3B deficit.\n\nAlbo bought a $4.3M beach house during a cost-of-living crisis.\n\nWe built a coin flip.\n\ndoubledown.au 🪙🇦🇺\n@JEChalmers @AlboMP")}>𝕏 Tweet</button>
+          <button className="ss-btn ss-rd" onClick={()=>window.open("https://www.reddit.com/submit?url=https://doubledown.au&title="+encodeURIComponent("We built a coin flip to explain the 2026 budget — your goal is to buy Albo's $4.3M beach house"),"_blank")}>📮 Reddit</button>
+          <button className="ss-btn ss-cp" onClick={doShare}>{shared?"✅":"📋 Copy"}</button>
         </div>
-      ))}
-    </div>
-  </section>
+      </div>
 
-  {/* LEADERBOARD */}
-  <section className="section section--dark">
-    <div className="section-inner">
-      <div className="section-lbl">LIVE LEADERBOARD — EVERYONE STARTS AT $1,000</div>
-      <div className="lb-preview"><Leaderboard compact={true}/></div>
-      <button className="cta" style={{marginTop:20}} onClick={onPlay}>Join the Leaderboard →</button>
+      {/* CARICATURES */}
+      <div className="caric-row">
+        <div className="caric-card">
+          <AlboCaricature/>
+          <div className="caric-name">Anthony Albanese</div>
+          <div className="caric-fact">Purchased $4.3M clifftop beach house at Copacabana, NSW — during Australia's worst cost-of-living crisis in 40 years.</div>
+          <button className="caric-btn" onClick={()=>tweet('Albo bought a $4.3M beach house during a cost-of-living crisis.\n\nYour move: doubledown.au 🏖️🇦🇺')}>Share this</button>
+        </div>
+        <div className="vs-block">
+          <div className="vs-text">VS</div>
+          <div className="vs-sub">you</div>
+          <div className="vs-balance">$1,000<br/><span>to start</span></div>
+        </div>
+        <div className="caric-card">
+          <ChalmersCaricature/>
+          <div className="caric-name">Jim Chalmers</div>
+          <div className="caric-fact">Removed CGT discount. Left a $28.3 billion deficit. Called it "the most ambitious budget in decades." Stands by this.</div>
+          <button className="caric-btn" onClick={()=>tweet('Jim Chalmers left a $28.3B deficit and called it ambitious.\n\nWe built a coin flip. doubledown.au @JEChalmers')}>Share this</button>
+        </div>
+      </div>
+
+      {/* BADGES PREVIEW */}
+      <div className="tc-section">
+        <div className="tc-lbl">🏅 {BADGES.length} BADGES TO EARN</div>
+        <div className="tc-sub">Starting from "First Flip" to "10× Albo's Houses." Each one a small act of financial resistance.</div>
+        <div className="all-badges">
+          {BADGES.map(b=>(
+            <div key={b.id} className="badge-preview">
+              <div className="bp-big-em">{b.emoji}</div>
+              <div className="bp-title">{b.label}</div>
+              <div className="bp-d">{b.desc}</div>
+            </div>
+          ))}
+        </div>
+        <button className="cta" style={{marginTop:20}} onClick={onPlay}>Start Earning Badges →</button>
+      </div>
     </div>
-  </section>
+  )}
+
+  {/* ── BUDGET TAB ── */}
+  {tab==="budget" && (
+    <div className="tc">
+      <div className="tc-section tc-section--hero">
+        <div className="tc-lbl">📉 THE 2026 FEDERAL BUDGET — IN PLAIN ENGLISH</div>
+        <div className="budget-cards">
+          {[
+            { n:"$28,300,000,000", label:"Budget Deficit", sub:"Jim Chalmers called this 'an improvement.' It is still $28.3 billion.", color:"red" },
+            { n:"$897/sec", label:"Rate of Borrowing", sub:"Australia borrows $897 every second. You earn $0 of that.", color:"red" },
+            { n:"$4,300,000", label:"Albo's Beach House", sub:"Purchased during the cost-of-living crisis he was meant to fix.", color:"gold" },
+            { n:"0¢", label:"Your CGT Discount", sub:"Removed. Gone. Chalmers did that. We made a game about it.", color:"red" },
+            { n:"65¢ → $13", label:"Price of a Beer (1980→Now)", sub:"A 1,900% increase. Wages grew 600%. Do the maths.", color:"muted" },
+            { n:"FREE → $65,000", label:"A Uni Degree (1980→Now)", sub:"HECS: Australia's most expensive gift to future generations.", color:"muted" },
+          ].map((s,i)=>(
+            <div key={i} className={`bcard bcard--${s.color}`}>
+              <div className="bcard-n">{s.n}</div>
+              <div className="bcard-label">{s.label}</div>
+              <div className="bcard-sub">{s.sub}</div>
+            </div>
+          ))}
+        </div>
+        <div className="tc-section">
+          <div className="tc-lbl">THE FIVE TRUTHS THEY WON'T TELL YOU</div>
+          {[
+            { q:"Jim Chalmers bet your CGT discount on red. It landed on black. We let you pick the colour.", share:"Jim Chalmers bet your CGT discount on red. It landed on black. We let you pick: doubledown.au" },
+            { q:"Albanese said 'I know what it's like to struggle.' Then bought a $4.3M clifftop. We built a leaderboard.", share:"'I know what it's like to struggle' — Anthony Albanese, who owns a $4.3M beach house. doubledown.au" },
+            { q:"Four years to see your tax cuts. Four seconds to flip for yours.", share:"Four years to see your tax cuts. Four seconds to flip for yours. doubledown.au 🪙" },
+            { q:"The Treasurer says the deficit improved by $8.5 billion. It's still $28.3B. We'll take that bet.", share:"The Treasurer says the deficit 'improved.' It's still $28.3B. We'll take that bet: doubledown.au @JEChalmers" },
+            { q:"Two-up: Australia's oldest financial instrument. Older than negative gearing. More reliable than Labor.", share:"Two-up: older than negative gearing. More reliable than Labor. doubledown.au 🇦🇺" },
+          ].map((j,i)=>(
+            <div className="joke" key={i}>
+              <span className="joke-n">0{i+1}</span>
+              <div className="joke-body">
+                <q className="joke-q">"{j.q}"</q>
+                <button className="joke-share" onClick={()=>tweet(j.share)}>𝕏</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* ── ALBO'S HOUSE TAB ── */}
+  {tab==="albo" && (
+    <div className="tc">
+      <div className="tc-section tc-section--gold">
+        <div className="tc-lbl">🏖️ THE GOAL: $4,300,000</div>
+        <div className="albo-feature">
+          <div className="albo-feat-caric"><AlboCaricature/></div>
+          <div className="albo-feat-facts">
+            <h2 className="albo-feat-h2">Albo's Copacabana Clifftop</h2>
+            <ul className="albo-facts-list">
+              {[
+                ["📍","Copacabana, NSW Central Coast"],
+                ["🛏️","4 bedrooms, 3 bathrooms"],
+                ["🌊","Uninterrupted ocean & Sydney skyline views"],
+                ["💰","Purchase price: $4,300,000"],
+                ["📅","Purchased: 2024 — mid cost-of-living crisis"],
+                ["🏘️","Median Sydney house at time: ~$1.65M"],
+                ["😤","Times said 'I know what it's like to struggle': Several"],
+              ].map(([icon,fact],i)=>(
+                <li key={i} className="albo-fact"><span>{icon}</span><span>{fact}</span></li>
+              ))}
+            </ul>
+            <button className="cta" style={{marginTop:16}} onClick={onPlay}>Earn Your Own Beach House →</button>
+          </div>
+        </div>
+        <div className="albo-badges-section">
+          <div className="tc-lbl" style={{marginBottom:12}}>ALBO HOUSE BADGES — EARN ONE FOR EVERY $4.3M</div>
+          <div className="all-badges">
+            {BADGES.filter(b=>b.id.startsWith("albo")||b.id==="survivor"||b.id==="century").map(b=>(
+              <div key={b.id} className="badge-preview badge-preview--gold">
+                <div className="bp-big-em">{b.emoji}</div>
+                <div className="bp-title">{b.label}</div>
+                <div className="bp-d">{b.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="tweet-cta">
+          <button className="ss-btn ss-tw" onClick={()=>tweet("The goal: earn enough play credits to buy Albo's $4.3M Copacabana clifftop beach house — purchased during a cost-of-living crisis.\n\ndoubledown.au 🏖️🇦🇺 @AlboMP")}>𝕏 Tweet Albo's House</button>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* ── 1980 TAB ── */}
+  {tab==="prices" && (
+    <div className="tc">
+      <div className="tc-section">
+        <div className="tc-lbl">🕰️ WHAT YOUR MONEY ACTUALLY BUYS — 1980 vs 2026</div>
+        <div className="prices-feature">
+          <div className="prices-caric"><ChalmersCaricature/><div className="caric-name">Jim Chalmers</div><div className="caric-fact">"Inflation is moderating." — Jim Chalmers, 2026</div></div>
+          <div className="prices-calc"><Calc1980/></div>
+        </div>
+        <div className="tweet-cta">
+          <button className="ss-btn ss-tw" onClick={()=>tweet("A beer cost 65¢ in 1980.\nNow it's $13.\n\nRent was $55/week in Sydney.\nNow it's $700.\n\nUni was free.\nNow it's $65,000.\n\nAlbo's beach house didn't exist as a concept.\nNow it costs $4.3M.\n\ndoubledown.au 🇦🇺")}>𝕏 Tweet These Numbers</button>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* ── LEADERBOARD TAB ── */}
+  {tab==="board" && (
+    <div className="tc">
+      <div className="tc-section">
+        <div className="tc-lbl">🏆 LIVE LEADERBOARD — EVERYONE STARTS AT $1,000</div>
+        <div className="tc-sub">The national deficit is $28.3 billion. How far can you get on $1,000?</div>
+        <Leaderboard compact={false}/>
+        <button className="cta" style={{marginTop:20}} onClick={onPlay}>Join the Leaderboard →</button>
+      </div>
+    </div>
+  )}
+
+  {/* ── DONATE TAB ── */}
+  {tab==="donate" && (
+    <div className="tc">
+      <Donations/>
+    </div>
+  )}
 
   <footer className="footer">
     <div className="ft-logo">🎲 DOUBLE DOWN</div>
@@ -771,10 +997,9 @@ return (
       <button onClick={doShare}>Share</button>
     </div>
     <div className="ft-legal">
-      Satire. Play credits only. No real gambling or payments of any kind. Not financial, tax, or legal advice.
+      Satire. Play credits only. No real gambling or payments. Not financial, tax, or legal advice.
       Not endorsed by Jim Chalmers, Anthony Albanese, the ATO, the RBA, or any kangaroo.
-      Gambling Help Online: <strong>1800 858 858</strong>.
-      doubledown.au · 🇦🇺 Australia · 2026
+      Gambling Help: <strong>1800 858 858</strong>. doubledown.au · 🇦🇺 2026
     </div>
   </footer>
 </div>
@@ -804,7 +1029,7 @@ html{scroll-behavior:smooth;}
 –gold:#E8C84A;–gold2:#B89A28;
 –green:#1B7A44;–green2:#23A65A;
 –red:#DC3528;–text:#EAE8E0;
-–muted:rgba(234,232,224,.45);–border:rgba(234,232,224,.09);
+–muted:rgba(234,232,224,.62);–border:rgba(234,232,224,.09);
 –mono:‘Space Mono’,monospace;–cond:‘Barlow Condensed’,sans-serif;
 }
 body{background:var(–bg);color:var(–text);font-family:var(–mono);min-height:100vh;}
@@ -825,7 +1050,7 @@ a{color:inherit;}
     .deficit-bar{background:rgba(220,53,40,.1);border-bottom:2px solid rgba(220,53,40,.3);padding:10px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
     .deficit-label{font-size:9px;letter-spacing:.2em;color:var(--red);font-family:var(--mono);}
     .deficit-num{font-family:var(--cond);font-size:clamp(18px,5vw,28px);font-weight:900;color:var(--red);letter-spacing:.02em;}
-    .deficit-sub{font-size:9px;color:var(--muted);font-style:italic;}
+    .deficit-sub{font-size:10px;color:rgba(234,232,224,.6);font-style:italic;}
             .nav-donate{background:var(--gold);color:#080C0A;font-family:var(--cond);font-weight:800;font-size:12px;padding:6px 12px;border-radius:4px;text-decoration:none;}
     .social-share-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;}
     .ss-btn{padding:8px 16px;border-radius:5px;border:1.5px solid;font-family:var(--cond);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.03em;}
@@ -870,18 +1095,18 @@ a{color:inherit;}
 
     /* ALL BADGES PREVIEW */
     .all-badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
-    .badge-preview{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;transition:border .15s;}
+    .badge-preview{background:rgba(255,255,255,.03);border:1px solid rgba(234,232,224,.1);border-radius:8px;padding:14px;text-align:center;transition:border .15s;}
     .badge-preview:hover{border-color:rgba(232,200,74,.3);}
     .bp-big-em{font-size:28px;margin-bottom:6px;}
     .bp-title{font-family:var(--cond);font-size:13px;font-weight:700;color:var(--gold);margin-bottom:4px;}
-    .bp-d{font-size:9px;color:var(--muted);line-height:1.5;}
+    .bp-d{font-size:10px;color:var(--muted);line-height:1.6;}
 
     /* ALBO SECTION */
     .albo-section{background:rgba(232,200,74,.06);border-top:1px solid rgba(232,200,74,.15);border-bottom:1px solid rgba(232,200,74,.15);padding:36px 20px;}
     .albo-sec-inner{max-width:820px;margin:0 auto;display:flex;gap:20px;align-items:flex-start;}
     .albo-sec-em{font-size:52px;flex-shrink:0;}
     .albo-sec-title{font-family:var(--cond);font-size:clamp(20px,4vw,36px);font-weight:900;color:var(--gold);margin-bottom:8px;}
-    .albo-sec-sub{font-size:12px;color:var(--muted);line-height:1.8;}
+    .albo-sec-sub{font-size:12px;color:rgba(234,232,224,.72);line-height:1.8;}
 
     /* AUTH */
     .auth-page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;}
@@ -910,7 +1135,7 @@ a{color:inherit;}
     .hero-eye{font-size:9px;letter-spacing:.22em;color:var(--muted);margin-bottom:16px;}
     .hero-h1{font-family:var(--cond);font-weight:900;font-size:clamp(42px,9vw,100px);line-height:.88;color:var(--text);margin-bottom:22px;}
     .hero-h1 em{font-style:normal;color:var(--gold);}
-    .hero-p{font-size:13px;line-height:1.8;color:var(--muted);max-width:520px;margin:0 auto 26px;}
+    .hero-p{font-size:13px;line-height:1.8;color:rgba(234,232,224,.75);max-width:520px;margin:0 auto 26px;}
     .hero-p strong{color:var(--text);}
     .hero-ctas{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;}
     .cta{background:var(--green);border:none;color:#fff;font-family:var(--cond);font-weight:800;font-size:17px;letter-spacing:.05em;padding:15px 36px;border-radius:6px;cursor:pointer;transition:all .15s;box-shadow:0 4px 24px rgba(27,122,68,.5);}
@@ -918,14 +1143,14 @@ a{color:inherit;}
     .cta--ghost{background:transparent;border:1.5px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:12px;}
     .cta--ghost:hover{border-color:var(--gold);color:var(--gold);transform:none;box-shadow:none;background:transparent;}
     .hero-badges{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;}
-    .hbadge{font-size:10px;padding:4px 9px;border:1px solid var(--border);border-radius:20px;color:var(--muted);}
+    .hbadge{font-size:10px;padding:4px 9px;border:1px solid rgba(234,232,224,.15);border-radius:20px;color:rgba(234,232,224,.65);}
 
     /* SECTIONS */
     .section{padding:44px 20px;border-top:1px solid var(--border);}
-    .section--dark{background:var(--bg2);}
+    .section--dark{background:var(--bg2);border-top:1px solid rgba(234,232,224,.07);}
     .section-inner{max-width:820px;margin:0 auto;}
-    .section-lbl{font-size:9px;letter-spacing:.26em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
-    .section-desc{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:22px;}
+    .section-lbl{font-size:9px;letter-spacing:.22em;color:rgba(234,232,224,.7);text-transform:uppercase;margin-bottom:10px;}
+    .section-desc{font-size:12px;color:rgba(234,232,224,.7);line-height:1.7;margin-bottom:22px;}
 
     /* 1980 CALC */
     .calc80{}
@@ -933,13 +1158,15 @@ a{color:inherit;}
     .c80tab{padding:7px 13px;border-radius:5px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:11px;cursor:pointer;transition:all .12s;}
     .c80tab:hover,.c80tab--on{border-color:var(--gold);color:var(--gold);}
     .c80tab--on{background:rgba(232,200,74,.07);}
-    .tbl-wrap{overflow-x:auto;}
-    .tbl-head{display:grid;grid-template-columns:1fr 90px 90px 60px;gap:6px;padding:5px 8px;font-size:9px;letter-spacing:.18em;color:var(--muted);border-bottom:1px solid var(--border);}
-    .tbl-row{display:grid;grid-template-columns:1fr 90px 90px 60px;gap:6px;padding:8px;border-bottom:1px solid rgba(255,255,255,.04);align-items:center;}
+    .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:6px;border:1px solid var(--border);}
+    .tbl-head{display:grid;grid-template-columns:1fr 72px 72px 52px;gap:4px;padding:5px 8px;font-size:9px;letter-spacing:.18em;color:var(--muted);border-bottom:1px solid var(--border);}
+    .tbl-row{display:grid;grid-template-columns:1fr 72px 72px 52px;gap:4px;padding:8px;border-bottom:1px solid rgba(255,255,255,.04);align-items:center;}
+    @media(max-width:420px){.tbl-head,.tbl-row{grid-template-columns:1fr 62px 62px;} .tbl-head span:last-child,.tbl-mult{display:none;}}
     .tbl-row:hover{background:rgba(255,255,255,.02);}
     .tbl-row--pain{background:rgba(220,53,40,.04);}
     .tbl-row--albo{background:rgba(232,200,74,.05);border-color:rgba(232,200,74,.1);}
-    .tbl-item{display:flex;align-items:center;gap:6px;font-size:11px;}
+    .tbl-item{display:flex;align-items:center;gap:5px;font-size:11px;}
+    @media(max-width:420px){.tbl-item{font-size:10px;} .tbl-old,.tbl-new{font-size:10px;}}
     .tbl-em{font-size:15px;}
     .tbl-old{font-size:11px;color:#4ade80;font-family:var(--mono);}
     .tbl-new{font-size:11px;color:var(--red);font-family:var(--mono);}
@@ -947,7 +1174,7 @@ a{color:inherit;}
     .tbl-mult{font-family:var(--cond);font-size:13px;font-weight:700;color:var(--muted);}
     .tbl-mult--pain{color:var(--red);}
     .tbl-mult--albo{color:var(--gold);font-size:10px;}
-    .tbl-note{font-size:9px;color:rgba(234,232,224,.2);margin-top:8px;text-align:center;}
+    .tbl-note{font-size:9px;color:rgba(234,232,224,.4);margin-top:8px;text-align:center;}
     .ybwrap{}
     .yb-ctrl{margin-bottom:18px;}
     .yb-lbl{font-size:9px;letter-spacing:.18em;color:var(--muted);display:block;margin-bottom:8px;}
@@ -988,10 +1215,82 @@ a{color:inherit;}
     .don-btn--kofi:hover{background:rgba(232,200,74,.14);}
     .don-btn--bmc{border-color:var(--border);background:transparent;color:var(--text);}
     .don-btn--bmc:hover{border-color:var(--gold);}
-    .don-tag{font-size:9px;letter-spacing:.1em;color:var(--muted);font-family:var(--mono);font-weight:400;}
+    .don-tag{font-size:10px;letter-spacing:0;color:var(--muted);font-family:var(--cond);font-weight:400;}
     .don-setup{font-size:11px;color:var(--muted);line-height:1.7;background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:14px;text-align:left;}
     .don-setup strong{color:var(--text);}
     .don-link{color:var(--green2);text-decoration:underline;}
+
+
+    /* CARICATURES */
+    .caric{width:100%;height:auto;border-radius:12px;display:block;}
+    .caric-row{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;max-width:700px;margin:28px auto 0;padding:0 16px;}
+    .caric-card{text-align:center;}
+    .caric-name{font-family:var(--cond);font-size:15px;font-weight:900;color:var(--gold);margin:8px 0 4px;letter-spacing:.05em;}
+    .caric-fact{font-size:9px;color:var(--muted);line-height:1.6;margin-bottom:8px;}
+    .caric-btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:10px;padding:5px 10px;border-radius:4px;cursor:pointer;transition:all .15s;}
+    .caric-btn:hover{border-color:var(--gold);color:var(--gold);}
+    .vs-block{text-align:center;padding:12px;}
+    .vs-text{font-family:var(--cond);font-size:36px;font-weight:900;color:var(--text);line-height:1;}
+    .vs-sub{font-size:9px;color:var(--muted);letter-spacing:.2em;margin-bottom:8px;}
+    .vs-balance{font-family:var(--cond);font-size:18px;font-weight:900;color:var(--green2);line-height:1.2;}
+    .vs-balance span{font-size:9px;color:var(--muted);font-family:var(--mono);}
+
+    /* TABS */
+    .ltabs{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);background:var(--bg2);-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+    .ltabs::-webkit-scrollbar{display:none;}
+    .ltab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 14px;border:none;background:transparent;color:var(--muted);font-family:var(--mono);font-size:9px;letter-spacing:.1em;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;flex-shrink:0;}
+    .ltab:hover{color:var(--text);}
+    .ltab--on{color:var(--gold);border-bottom-color:var(--gold);}
+    .ltab-icon{font-size:16px;}
+    .ltab-lbl{letter-spacing:.12em;text-transform:uppercase;}
+
+    /* TAB CONTENT */
+    .tc{min-height:60vh;}
+    .tc-section{max-width:820px;margin:0 auto;padding:36px 16px;}
+    .tc-section--hero{background:transparent;}
+    .tc-section--gold{background:rgba(232,200,74,.03);}
+    .tc-lbl{font-size:9px;letter-spacing:.26em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+    .tc-sub{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:20px;}
+
+    /* BUDGET CARDS */
+    .budget-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin:16px 0 28px;}
+    .bcard{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;}
+    .bcard--red{border-color:rgba(220,53,40,.3);background:rgba(220,53,40,.05);}
+    .bcard--gold{border-color:rgba(232,200,74,.3);background:rgba(232,200,74,.05);}
+    .bcard--muted{border-color:var(--border);}
+    .bcard-n{font-family:var(--cond);font-size:clamp(18px,4vw,28px);font-weight:900;color:var(--text);margin-bottom:4px;}
+    .bcard--red .bcard-n{color:var(--red);}
+    .bcard--gold .bcard-n{color:var(--gold);}
+    .bcard-label{font-family:var(--cond);font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;}
+    .bcard-sub{font-size:10px;color:var(--muted);line-height:1.5;}
+
+    /* JOKE SHARE */
+    .joke-body{display:flex;align-items:flex-start;gap:10px;flex:1;}
+    .joke-share{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:11px;padding:4px 8px;border-radius:4px;cursor:pointer;flex-shrink:0;transition:all .15s;}
+    .joke-share:hover{border-color:rgba(29,161,242,.5);color:#1da1f2;}
+
+    /* ALBO FEATURE */
+    .albo-feature{display:grid;grid-template-columns:160px 1fr;gap:20px;align-items:start;margin:16px 0 24px;}
+    @media(max-width:480px){.albo-feature{grid-template-columns:1fr;};}
+    .albo-feat-caric{width:160px;}
+    .albo-feat-h2{font-family:var(--cond);font-size:clamp(20px,4vw,30px);font-weight:900;color:var(--gold);margin-bottom:12px;}
+    .albo-facts-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
+    .albo-fact{display:flex;gap:10px;font-size:11px;color:var(--text);align-items:flex-start;}
+    .albo-fact span:first-child{font-size:15px;flex-shrink:0;}
+    .albo-badges-section{margin-top:28px;}
+    .badge-preview--gold{border-color:rgba(232,200,74,.2)!important;}
+
+    /* PRICES FEATURE */
+    .prices-feature{display:grid;grid-template-columns:160px 1fr;gap:20px;align-items:start;margin:16px 0 24px;}
+    @media(max-width:480px){.prices-feature{grid-template-columns:1fr;};}
+    .prices-caric{width:160px;text-align:center;}
+    .prices-calc{flex:1;}
+
+    /* TWEET CTA */
+    .tweet-cta{text-align:center;margin-top:24px;}
+
+    /* BIG CTA */
+    .cta--big{font-size:18px;padding:16px 40px;width:100%;max-width:420px;display:block;margin:0 auto 16px;}
 
     /* JOKES */
     .joke{display:flex;gap:16px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--border);}
