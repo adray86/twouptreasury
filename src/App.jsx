@@ -415,6 +415,7 @@ We accept donations in <strong>AUD or NZD</strong> — because at least one of t
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
 function Auth({ onSignIn, onGuest }) {
 const [name, setName] = useState(””);
+const [email, setEmail] = useState(””);
 const [loading, setLoading] = useState(false);
 const [error, setError] = useState(””);
 
@@ -425,8 +426,9 @@ const safe = name.trim().slice(0,20).replace(/[^a-zA-Z0-9_-]/g,””);
 if (!safe) { setError(“Letters, numbers, underscores and dashes only.”); setLoading(false); return; }
 let profile = await loadProfile(safe);
 if (!profile) {
-profile = { name:safe, balance:STARTING, flips:0, wins:0, lowestEver:STARTING, createdAt:Date.now() };
+profile = { name:safe, balance:STARTING, flips:0, wins:0, lowestEver:STARTING, createdAt:Date.now(), email:email.trim()||null };
 }
+if (email.trim() && !profile.email) profile.email = email.trim();
 await saveProfile(profile);
 setLoading(false);
 onSignIn(profile);
@@ -450,12 +452,14 @@ return (
     <div className="auth-lbl">PICK A NAME. KEEP YOUR SCORE.</div>
     <input className="auth-inp" placeholder="Username (e.g. ChalmersBuster99)…" value={name}
       onChange={e=>{setName(e.target.value);setError("");}}
-      onKeyDown={e=>e.key==="Enter"&&handleSignIn()} maxLength={20}/>
+      onKeyDown={e=>e.key==="Enter"&&handleSignIn()} maxLength={20} autoFocus/>
+    <input className="auth-inp" placeholder="Email (optional — to recover your account)" value={email||""}
+      onChange={e=>setEmail(e.target.value)} type="email"/>
     {error && <div className="auth-err">{error}</div>}
     <button className="auth-btn" disabled={!name.trim()||loading} onClick={handleSignIn}>
-      {loading?"Loading…":"Save My Progress →"}
+      {loading?"Saving…":"Save My Progress & Join Leaderboard →"}
     </button>
-    <div className="auth-hint">Appears on the leaderboard · badges persist · pick a new name to start fresh</div>
+    <div className="auth-hint">Leaderboard · badges · balance all saved · email optional but lets you recover your account</div>
   </div>
 </div>
 ```
@@ -610,7 +614,8 @@ return (
           }}>📤 Share this flip</button>}
           {outcome==="win" && isGuest && (
             <button className="flip-signup-btn" onClick={onBack}>
-              🏆 You're at ${fmtN(profile.balance)} — Sign up to save it &amp; hit the leaderboard →
+              🏆 Sign up to save your progress &amp; appear on the leaderboard
+              <span className="signup-sub">You're at ${fmtN(profile.balance)} — don't lose it when you leave</span>
             </button>
           )}
         </div>
@@ -666,16 +671,36 @@ return (
                 🔄 Reset to $1,000 — Free
               </button>
               <div className="bust-or">— or —</div>
-              <button className="refill-btn refill-btn--share" onClick={async ()=>{
-                const txt="I just blew my entire balance on doubledown.au 💸 Starting over with $100,000 — someone has to beat Albo's $4.3M beach house 🏖️🇦🇺 doubledown.au";
-                try { await navigator.share({title:"Double Down",text:txt,url:"https://doubledown.au"}); }
-                catch { navigator.clipboard.writeText(txt).catch(()=>{}); }
-                const r={...profile,balance:100000,flips:0,wins:0,lowestEver:100000};
-                setProfile(r); setHist([]); if(!isGuest)persist(r);
-              }}>
-                📤 Share &amp; Restart with $100,000
-                <span className="refill-tag">Tell the world you're cooked. Get a bigger bag.</span>
-              </button>
+              <div className="refill-share-box">
+                <div className="refill-share-lbl">📤 Share &amp; restart with $100,000</div>
+                <div className="refill-share-sub">Post on social. Get a bigger bag.</div>
+                <div className="refill-social-row">
+                  {[
+                    {label:"𝕏 Twitter", color:"#1da1f2", fn:()=>{
+                      const txt="I just blew my entire balance on doubledown.au 💸%0AStarting over with $100,000 — someone has to beat Albo's $4.3M beach house 🏖️🇦🇺%0A%0Adoubledown.au @JEChalmers @AlboMP";
+                      window.open("https://twitter.com/intent/tweet?text="+txt,"_blank");
+                    }},
+                    {label:"Facebook", color:"#1877f2", fn:()=>{
+                      window.open("https://www.facebook.com/sharer/sharer.php?u=https://doubledown.au&quote=I+just+blew+my+entire+balance+on+doubledown.au+Starting+over+with+$100,000","_blank");
+                    }},
+                    {label:"Reddit", color:"#ff5600", fn:()=>{
+                      const title="I just went broke on a satirical Australian budget coin flip. Restarting with $100,000.";
+                      window.open("https://www.reddit.com/submit?url=https://doubledown.au&title="+encodeURIComponent(title),"_blank");
+                    }},
+                    {label:"📋 Copy", color:"#B0ADA6", fn:()=>{
+                      navigator.clipboard.writeText("I just blew my entire balance on doubledown.au 💸 Starting over with $100,000 — someone has to beat Albo's $4.3M beach house 🏖️🇦🇺 doubledown.au");
+                    }},
+                  ].map(({label,color,fn})=>(
+                    <button key={label} className="social-refill-btn" style={{borderColor:color,color}} onClick={()=>{
+                      fn();
+                      setTimeout(()=>{
+                        const r={...profile,balance:100000,flips:0,wins:0,lowestEver:100000};
+                        setProfile(r); setHist([]); if(!isGuest)persist(r);
+                      }, 800);
+                    }}>{label}</button>
+                  ))}
+                </div>
+              </div>
             </div>
         : !pick
           ? <div className="flip-hint">👆 Pick heads or tails first</div>
@@ -710,7 +735,11 @@ return (
     {/* LEADERBOARD */}
     <div className={`board-col${tab!=="board"?" board-col--hidden":""}`}>
       <Leaderboard currentUser={isGuest?null:profile.name}/>
-      {isGuest&&<div className="guest-note">👀 You're in ghost mode. <button className="link-btn" onClick={onBack}>Pick a username →</button> to appear on the leaderboard and keep your {getEarnedBadges(profile).length} badge{getEarnedBadges(profile).length!==1?"s":""}.</div>}
+      {isGuest&&<div className="guest-note guest-note--cta">
+        <div className="gn-title">👻 You're invisible.</div>
+        <div className="gn-body">Guest players don't appear on the leaderboard and lose everything when they leave.</div>
+        <button className="gn-btn" onClick={onBack}>Sign up to save your progress →</button>
+      </div>}
     </div>
 
     {/* CHAT */}
@@ -1451,6 +1480,12 @@ a{color:inherit;}
     .game-foot{padding:10px 18px;border-top:1px solid var(--border);font-size:9px;color:rgba(234,232,224,.4);text-align:center;}
     .game-foot strong{color:rgba(234,232,224,.32);}
     .guest-note{padding:11px 13px;font-size:10px;color:var(--muted);border-top:1px solid var(--border);}
+    .guest-note--cta{background:rgba(232,200,74,.05);border:1px solid rgba(232,200,74,.15);border-radius:8px;margin:12px;padding:14px;text-align:center;}
+    .gn-title{font-family:var(--cond);font-size:16px;font-weight:900;color:var(--gold);margin-bottom:5px;}
+    .gn-body{font-size:11px;color:#A8A5A0;line-height:1.6;margin-bottom:10px;}
+    .gn-btn{width:100%;padding:11px;background:var(--green);border:none;color:#fff;font-family:var(--cond);font-weight:800;font-size:14px;border-radius:6px;cursor:pointer;letter-spacing:.03em;}
+    .gn-btn:hover{background:var(--green2);}
+    .signup-sub{display:block;font-size:10px;font-weight:400;font-family:var(--mono);margin-top:4px;opacity:.8;}
 
     /* BAL BAR */
     .bal-bar{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
@@ -1465,7 +1500,7 @@ a{color:inherit;}
     .out-w{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2);}
     .flip-share-btn{display:block;width:100%;margin-top:8px;padding:7px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:5px;color:#4ade80;font-family:var(--cond);font-size:12px;font-weight:700;cursor:pointer;transition:all .12s;}
     .flip-share-btn:hover{background:rgba(74,222,128,.2);}
-    .flip-signup-btn{display:block;width:100%;margin-top:6px;padding:9px 10px;background:rgba(232,200,74,.08);border:1.5px solid rgba(232,200,74,.35);border-radius:5px;color:var(--gold);font-family:var(--cond);font-size:12px;font-weight:700;cursor:pointer;transition:all .12s;text-align:center;}
+    .flip-signup-btn{display:block;width:100%;margin-top:8px;padding:12px 10px;background:rgba(232,200,74,.1);border:2px solid rgba(232,200,74,.5);border-radius:7px;color:var(--gold);font-family:var(--cond);font-size:14px;font-weight:800;cursor:pointer;transition:all .12s;text-align:center;}
     .flip-signup-btn:hover{background:rgba(232,200,74,.15);border-color:var(--gold);}
     .out-l{background:rgba(220,53,40,.08);color:#ef4444;border:1px solid rgba(220,53,40,.16);}
     @keyframes pop{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1;}}
@@ -1526,6 +1561,12 @@ a{color:inherit;}
     .refill-btn--share:hover{background:rgba(232,200,74,.22);}
     .refill-tag{font-size:10px;font-weight:400;opacity:.75;font-family:var(--mono);letter-spacing:0;}
     .bust-or{font-size:11px;color:#7E7C77;margin:10px 0;letter-spacing:.1em;}
+    .refill-share-box{background:rgba(232,200,74,.06);border:1.5px solid rgba(232,200,74,.25);border-radius:8px;padding:14px;text-align:center;}
+    .refill-share-lbl{font-family:var(--cond);font-size:16px;font-weight:900;color:var(--gold);margin-bottom:3px;}
+    .refill-share-sub{font-size:10px;color:#7E7C77;margin-bottom:12px;letter-spacing:.05em;}
+    .refill-social-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+    .social-refill-btn{padding:10px 6px;border-radius:6px;border:1.5px solid;background:transparent;font-family:var(--cond);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.02em;}
+    .social-refill-btn:hover{opacity:.8;background:rgba(255,255,255,.05);}
     .refill-btn:hover{border-color:var(--green2);color:var(--green2);}
     .chips-row{display:flex;gap:4px;flex-wrap:wrap;}
     .chip{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:1.5px solid;font-family:var(--mono);}
