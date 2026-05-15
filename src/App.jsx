@@ -1,18 +1,39 @@
 import { useState, useEffect, useRef, useCallback } from “react”;
+import { supabase } from “./supabase.js”;
 
 // ─── SEO ─────────────────────────────────────────────────────────────────────
 function injectMeta() {
 document.title = “Double Down | Beat Albo’s $4.3M Beach House — One Flip At A Time”;
+const rob = document.createElement(“meta”); rob.name=“robots”; rob.content=“index,follow”; document.head.appendChild(rob);
 [
 [“description”,“Double Down: Australia’s most ambitious coin flip. $1,000 to start. Global leaderboard. Badges. See what your money bought in 1980 vs now.”],
 [“og:title”,“Double Down | Ignore CGT. Flip a Coin. Don’t Pay A Cent.”],
 [“og:description”,“Start with $1,000 in play credits. Flip coins. Earn badges. Climb the leaderboard. Jim Chalmers bought a $4.3M beach house. Beat him.”],
-[“keywords”,“Australia budget satire, coin flip game, 1980 prices Australia, Albanese house, leaderboard, play credits, Jim Chalmers, two-up, badges”],
+[“keywords”,“Australia budget satire, coin flip, doubledown.au, Jim Chalmers, Albanese beach house, CGT discount, 1980 prices Australia, leaderboard”],
+[“twitter:card”,“summary_large_image”],
+[“twitter:title”,“Double Down — Beat Albo’s $4.3M Beach House”],
+[“twitter:description”,“Free coin flip. $1,000 to start. Albo’s $4.3M house is the goal. Deficit ticking at $897/sec. doubledown.au”],
+[“og:url”,“https://doubledown.au”],
 ].forEach(([k,v]) => {
 const m = document.createElement(“meta”);
 m.setAttribute(k.includes(“og:”) ? “property” : “name”, k);
 m.content = v; document.head.appendChild(m);
 });
+// JSON-LD structured data for Google
+const ld = document.createElement(“script”);
+ld.type = “application/ld+json”;
+ld.text = JSON.stringify({
+“@context”:“https://schema.org”,
+“@type”:“WebApplication”,
+“name”:“Double Down”,
+“url”:“https://doubledown.au”,
+“description”:“Free satirical coin flip. Start with $1,000. Beat Albo’s $4.3M beach house. Jim Chalmers’ deficit: $28.3 billion. Your goal: earn more.”,
+“applicationCategory”:“Game”,
+“operatingSystem”:“Any”,
+“offers”:{”@type”:“Offer”,“price”:“0”,“priceCurrency”:“AUD”},
+“keywords”:“Australian budget satire, coin flip, Jim Chalmers, Albanese beach house, CGT, doubledown.au”
+});
+document.head.appendChild(ld);
 const can = document.createElement(“link”);
 can.rel = “canonical”; can.href = “https://doubledown.au”;
 document.head.appendChild(can);
@@ -102,35 +123,31 @@ return `${Math.floor(s/3600)}h`;
 };
 const STARTING = 1000;
 
-// ─── STORAGE ─────────────────────────────────────────────────────────────────
-async function sGet(key, shared=false) {
-try { const r = await window.storage.get(key, shared); return r?.value ? JSON.parse(r.value) : null; }
-catch { return null; }
-}
-async function sSet(key, val, shared=false) {
-try { await window.storage.set(key, JSON.stringify(val), shared); } catch {}
-}
+// ─── STORAGE (Supabase) ─────────────────────────────────────────────────────
 async function getLeaderboard() {
-const d = await sGet(“lb-v5”, true);
-return Array.isArray(d) ? d : [];
+try {
+const { data } = await supabase.from(“leaderboard”).select(”*”).order(“balance”,{ascending:false}).limit(50);
+return Array.isArray(data) ? data.map(r=>({
+name:r.name, balance:r.balance, flips:r.flips||0,
+badgeCount:r.badge_count||0, topHouseEmoji:r.top_house_emoji||null
+})) : [];
+} catch { return []; }
 }
 async function updateLeaderboard(entry) {
-const lb = await getLeaderboard();
-const idx = lb.findIndex(e => e.name === entry.name);
-if (idx >= 0) lb[idx] = { …lb[idx], …entry };
-else lb.push(entry);
-lb.sort((a,b) => b.balance - a.balance);
-await sSet(“lb-v5”, lb.slice(0,50), true);
+try {
+await supabase.from(“leaderboard”).upsert({
+name:entry.name, balance:entry.balance, flips:entry.flips||0,
+badge_count:entry.badgeCount||0, top_house_emoji:entry.topHouseEmoji||null,
+updated_at: new Date().toISOString()
+},{onConflict:“name”});
+} catch {}
 }
-async function loadProfile(name) { return sGet(`prof-${name}`, false); }
-async function saveProfile(p) {
-await sSet(`prof-${p.name}`, p, false);
-const earned = getEarnedBadges(p);
-const topHouse = getHighestHouseBadge(p);
-await updateLeaderboard({
-name: p.name, balance: p.balance, flips: p.flips, wins: p.wins,
-badgeCount: earned.length, topHouseEmoji: topHouse?.emoji || null, ts: Date.now()
-});
+async function loadProfile(name) {
+try {
+const { data } = await supabase.from(“profiles”).select(”*”).eq(“name”,name).single();
+if (data) return {name:data.name, balance:data.balance, flips:data.flips||0, wins:data.wins||0, lowestEver:data.lowest_ever||data.balance, createdAt:new Date(data.created_at||Date.now()).getTime(), badges:data.badges||[]};
+} catch {}
+return null;
 }
 
 // ─── BADGE STRIP ─────────────────────────────────────────────────────────────
@@ -219,8 +236,10 @@ const [text, setText] = useState(””);
 const [posting, setPosting] = useState(false);
 const endRef = useRef(null);
 const load = useCallback(async () => {
-const d = await sGet(“chat-v5”, true);
-if (Array.isArray(d)) setMsgs(d);
+try {
+const { data } = await supabase.from(“chat_messages”).select(”*”).order(“created_at”,{ascending:true}).limit(80);
+if (Array.isArray(data)) setMsgs(data.map(r=>({id:r.id,handle:r.handle,text:r.text,ts:new Date(r.created_at).getTime()})));
+} catch {}
 }, []);
 useEffect(() => { load(); const t=setInterval(load,5000); return ()=>clearInterval(t); }, [load]);
 useEffect(() => { endRef.current?.scrollIntoView({behavior:“smooth”}); }, [msgs]);
@@ -228,11 +247,11 @@ useEffect(() => { endRef.current?.scrollIntoView({behavior:“smooth”}); }, [m
 async function post() {
 if (!text.trim()||posting) return;
 setPosting(true);
-const m = {id:Date.now(), handle, text:text.trim(), ts:Date.now()};
-const cur = await sGet(“chat-v5”,true) || [];
-const updated = […(Array.isArray(cur)?cur:[]).slice(-79), m];
-await sSet(“chat-v5”, updated, true);
-setMsgs(updated); setText(””); setPosting(false);
+try {
+await supabase.from(“chat_messages”).insert({handle, text:text.trim()});
+await load();
+} catch {}
+setText(””); setPosting(false);
 }
 
 return (
@@ -352,7 +371,7 @@ We accept donations in <strong>AUD or NZD</strong> — because at least one of t
 </span>
 </div>
 <div className="don-btns">
-<a className="don-btn don-btn--kofi" href="https://ko.fi" target="_blank" rel="noopener noreferrer">
+<a className="don-btn don-btn--kofi" href="https://ko.fi/doubledown" target="_blank" rel="noopener noreferrer">
 ☕ Support on Ko-fi
 <span className="don-tag">0% platform fee · set up at ko.fi</span>
 </a>
@@ -361,11 +380,12 @@ We accept donations in <strong>AUD or NZD</strong> — because at least one of t
 <span className="don-tag">5% platform fee · buymeacoffee.com</span>
 </a>
 </div>
-<div className="don-setup">
-💡 <strong>To set up donations:</strong> Register at <a href="https://ko.fi" target="_blank" rel="noopener noreferrer" className="don-link">ko.fi</a> (free, 0% platform fee) and replace these links with your actual page URL. Ko-fi connects directly to your Stripe or PayPal — you keep ~97¢ of every dollar donated.
+
+```
+  </div>
 </div>
-</div>
-</div>
+```
+
 );
 }
 
@@ -597,10 +617,10 @@ return (
         <div className="gdon-lbl">ENJOY THE SATIRE? 🇦🇺</div>
         <div className="gdon-pitch">Milk: $3.50. Avo toast: $24. A tinny: $9. Albo's house: $4.3M.</div>
         <div className="gdon-btns">
-          <a className="gdon-btn" href="https://ko.fi" target="_blank" rel="noopener noreferrer">☕ Ko-fi (0% fee)</a>
+          <a className="gdon-btn" href="https://ko.fi/doubledown" target="_blank" rel="noopener noreferrer">☕ Ko-fi (0% fee)</a>
           <a className="gdon-btn gdon-btn--b" href="https://buymeacoffee.com" target="_blank" rel="noopener noreferrer">🍺 BMC (5% fee)</a>
         </div>
-        <div className="gdon-note">Add your actual Ko-fi/BMC page URL here once set up.</div>
+
       </div>
     </div>
 
@@ -660,8 +680,12 @@ return (
       Climb the leaderboard.
     </p>
     <div className="hero-ctas">
-      <button className="cta" onClick={onPlay}>Play — Start with $1,000 →</button>
-      <button className="cta cta--ghost" onClick={doShare}>📤 Share</button>
+      <button className="cta" onClick={onPlay}>🎲 Play Free — Start with $1,000 →</button>
+    </div>
+    <div className="social-share-row">
+      <button className="ss-btn ss-tw" onClick={()=>{window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent("Jim Chalmers killed the CGT discount and left a $28.3B deficit. Albo bought a $4.3M beach house. We built a coin flip. 🪙🇦🇺\n\ndoubledown.au @JEChalmers @AlboMP"),"_blank");}}>𝕏 Tweet This</button>
+      <button className="ss-btn ss-rd" onClick={()=>{window.open("https://www.reddit.com/submit?url=https://doubledown.au&title="+encodeURIComponent("We built a coin flip to explain the 2026 budget — your goal is to earn enough to buy Albo's $4.3M beach house"),"_blank");}}>📮 Post to Reddit</button>
+      <button className="ss-btn ss-cp" onClick={doShare}>{shared?"✅ Copied!":"📋 Copy Link"}</button>
     </div>
     <div className="hero-badges">
       <span className="hbadge">🪙 Play Credits Only</span>
@@ -750,7 +774,7 @@ return (
       Satire. Play credits only. No real gambling or payments of any kind. Not financial, tax, or legal advice.
       Not endorsed by Jim Chalmers, Anthony Albanese, the ATO, the RBA, or any kangaroo.
       Gambling Help Online: <strong>1800 858 858</strong>.
-      Double Down Pty Ltd (ACN: 420-069-666) · 🇦🇺 Australia · 2026
+      doubledown.au · 🇦🇺 Australia · 2026
     </div>
   </footer>
 </div>
@@ -798,11 +822,19 @@ a{color:inherit;}
     .nav-r{display:flex;align-items:center;gap:8px;}
     .nav-tag{font-size:9px;letter-spacing:.15em;color:var(--muted);display:none;}
     @media(min-width:600px){.nav-tag{display:inline;}}
-    .deficit-bar{background:rgba(220,53,40,.08);border-bottom:1px solid rgba(220,53,40,.2);padding:8px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+    .deficit-bar{background:rgba(220,53,40,.1);border-bottom:2px solid rgba(220,53,40,.3);padding:10px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
     .deficit-label{font-size:9px;letter-spacing:.2em;color:var(--red);font-family:var(--mono);}
-    .deficit-num{font-family:var(--cond);font-size:22px;font-weight:900;color:var(--red);letter-spacing:.02em;}
+    .deficit-num{font-family:var(--cond);font-size:clamp(18px,5vw,28px);font-weight:900;color:var(--red);letter-spacing:.02em;}
     .deficit-sub{font-size:9px;color:var(--muted);font-style:italic;}
             .nav-donate{background:var(--gold);color:#080C0A;font-family:var(--cond);font-weight:800;font-size:12px;padding:6px 12px;border-radius:4px;text-decoration:none;}
+    .social-share-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;}
+    .ss-btn{padding:8px 16px;border-radius:5px;border:1.5px solid;font-family:var(--cond);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.03em;}
+    .ss-tw{background:rgba(29,161,242,.1);border-color:rgba(29,161,242,.4);color:#1da1f2;}
+    .ss-tw:hover{background:rgba(29,161,242,.2);}
+    .ss-rd{background:rgba(255,86,0,.1);border-color:rgba(255,86,0,.4);color:#ff5600;}
+    .ss-rd:hover{background:rgba(255,86,0,.2);}
+    .ss-cp{background:transparent;border-color:var(--border);color:var(--muted);}
+    .ss-cp:hover{border-color:var(--gold);color:var(--gold);}
     .nav-share,.nav-back{background:transparent;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:6px 12px;border-radius:4px;cursor:pointer;transition:all .15s;}
     .nav-share:hover,.nav-back:hover{border-color:var(--gold);color:var(--gold);}
     .nav-user{font-family:var(--cond);font-size:13px;font-weight:700;color:var(--green2);}
@@ -881,7 +913,7 @@ a{color:inherit;}
     .hero-p{font-size:13px;line-height:1.8;color:var(--muted);max-width:520px;margin:0 auto 26px;}
     .hero-p strong{color:var(--text);}
     .hero-ctas{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;}
-    .cta{background:var(--green);border:none;color:#fff;font-family:var(--cond);font-weight:800;font-size:15px;letter-spacing:.05em;padding:13px 30px;border-radius:6px;cursor:pointer;transition:all .15s;box-shadow:0 4px 16px rgba(27,122,68,.4);}
+    .cta{background:var(--green);border:none;color:#fff;font-family:var(--cond);font-weight:800;font-size:17px;letter-spacing:.05em;padding:15px 36px;border-radius:6px;cursor:pointer;transition:all .15s;box-shadow:0 4px 24px rgba(27,122,68,.5);}
     .cta:hover{background:var(--green2);transform:translateY(-1px);}
     .cta--ghost{background:transparent;border:1.5px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:12px;}
     .cta--ghost:hover{border-color:var(--gold);color:var(--gold);transform:none;box-shadow:none;background:transparent;}
