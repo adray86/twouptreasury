@@ -87,6 +87,29 @@ return (
 );
 }
 
+// ─── LEADER TICKER ────────────────────────────────────────────────────────────
+function LeaderTicker() {
+const [lb, setLb] = useState([]);
+useEffect(() => {
+async function load() { const d = await getLeaderboard(); setLb(d.slice(0,10)); }
+load();
+const t = setInterval(load, 20000);
+return () => clearInterval(t);
+}, []);
+if (!lb.length) return null;
+const medals = [“🥇”,“🥈”,“🥉”];
+const items = lb.map((e,i) => `${medals[i]||("#"+(i+1))} ${e.topHouseEmoji||""}${e.name}  $${Number(e.balance).toLocaleString("en-AU")}`);
+const txt = […items,…items].join(”   ·   “);
+return (
+<div className="ticker-wrap">
+<span className="ticker-tag">🏆 LEADERBOARD</span>
+<div className="ticker-scroll">
+<span className="ticker-txt">{txt}</span>
+</div>
+</div>
+);
+}
+
 // ─── ITEMS: 1980 vs 2026 ─────────────────────────────────────────────────────
 const ITEMS = [
 { emoji:“🏠”, name:“Sydney House (median)”,  p80:68000,  p26:1650000, unit:”” },
@@ -531,6 +554,7 @@ return (
   </nav>
 
   <DeficitCounter/>
+  <LeaderTicker/>
   <div className="mob-tabs">
     {["flip","board","chat"].map(t=>(
       <button key={t} className={`mob-tab${tab===t?" mob-tab--on":""}`} onClick={()=>setTab(t)}>
@@ -581,9 +605,14 @@ return (
           {flipMsg}
           {outcome==="win" && <button className="flip-share-btn" onClick={()=>{
             const pct=((profile.balance/4300000)*100).toFixed(2);
-            const txt=`I just flipped ${pick==="H"?"🦅 HEADS":"🦘 TAILS"} on doubledown.au and won! Balance: $${profile.balance.toLocaleString()} — that's ${pct}% of Albo's $4.3M beach house 🏖️🇦🇺`;
+            const txt=`I just flipped ${pick==="H"?"🦅 HEADS":"🦘 TAILS"} on doubledown.au and won! Balance: $${profile.balance.toLocaleString("en-AU")} — that's ${pct}% of Albo's $4.3M beach house 🏖️🇦🇺`;
             navigator.share?navigator.share({text:txt,url:"https://doubledown.au"}):navigator.clipboard.writeText(txt);
           }}>📤 Share this flip</button>}
+          {outcome==="win" && isGuest && (
+            <button className="flip-signup-btn" onClick={onBack}>
+              🏆 You're at ${fmtN(profile.balance)} — Sign up to save it &amp; hit the leaderboard →
+            </button>
+          )}
         </div>
       )}
 
@@ -629,7 +658,25 @@ return (
 
 
       {profile.balance<=0
-        ? <button className="refill-btn" onClick={()=>{ const r={...profile,balance:STARTING,flips:0,wins:0}; setProfile(r); setHist([]); if(!isGuest)persist(r); }}>🔄 Refill to $1,000</button>
+        ? <div className="bust-box">
+              <div className="bust-em">💸</div>
+              <div className="bust-title">COOKED.</div>
+              <div className="bust-sub">You've blown the whole grand. Very Australian.<br/>Jim Chalmers feels your pain. He doesn't, but still.</div>
+              <button className="refill-btn" onClick={()=>{ const r={...profile,balance:STARTING,flips:0,wins:0,lowestEver:STARTING}; setProfile(r); setHist([]); if(!isGuest)persist(r); }}>
+                🔄 Reset to $1,000 — Free
+              </button>
+              <div className="bust-or">— or —</div>
+              <button className="refill-btn refill-btn--share" onClick={async ()=>{
+                const txt="I just blew my entire balance on doubledown.au 💸 Starting over with $100,000 — someone has to beat Albo's $4.3M beach house 🏖️🇦🇺 doubledown.au";
+                try { await navigator.share({title:"Double Down",text:txt,url:"https://doubledown.au"}); }
+                catch { navigator.clipboard.writeText(txt).catch(()=>{}); }
+                const r={...profile,balance:100000,flips:0,wins:0,lowestEver:100000};
+                setProfile(r); setHist([]); if(!isGuest)persist(r);
+              }}>
+                📤 Share &amp; Restart with $100,000
+                <span className="refill-tag">Tell the world you're cooked. Get a bigger bag.</span>
+              </button>
+            </div>
         : !pick
           ? <div className="flip-hint">👆 Pick heads or tails first</div>
           : <button className="flip-btn" disabled={phase!=="idle"||eff>profile.balance||eff<=0} onClick={flip}>
@@ -663,7 +710,7 @@ return (
     {/* LEADERBOARD */}
     <div className={`board-col${tab!=="board"?" board-col--hidden":""}`}>
       <Leaderboard currentUser={isGuest?null:profile.name}/>
-      {isGuest&&<div className="guest-note">Guest mode — <button className="link-btn" onClick={onBack}>sign up</button> to appear on the board and keep your badges.</div>}
+      {isGuest&&<div className="guest-note">👀 You're in ghost mode. <button className="link-btn" onClick={onBack}>Pick a username →</button> to appear on the leaderboard and keep your {getEarnedBadges(profile).length} badge{getEarnedBadges(profile).length!==1?"s":""}.</div>}
     </div>
 
     {/* CHAT */}
@@ -1089,6 +1136,12 @@ a{color:inherit;}
     .nav-r{display:flex;align-items:center;gap:8px;}
     .nav-tag{font-size:9px;letter-spacing:.15em;color:var(--muted);display:none;}
     @media(min-width:600px){.nav-tag{display:inline;}}
+    /* LEADER TICKER */
+    .ticker-wrap{display:flex;align-items:center;background:#0D1410;border-bottom:1px solid rgba(232,200,74,.15);overflow:hidden;height:32px;}
+    .ticker-tag{font-family:var(--cond);font-size:10px;font-weight:900;color:var(--gold);letter-spacing:.12em;padding:0 10px;white-space:nowrap;border-right:1px solid rgba(232,200,74,.2);flex-shrink:0;height:100%;display:flex;align-items:center;}
+    .ticker-scroll{flex:1;overflow:hidden;height:100%;display:flex;align-items:center;}
+    .ticker-txt{display:inline-block;white-space:nowrap;font-family:var(--mono);font-size:11px;color:#C4C1BA;animation:ticker 30s linear infinite;padding-left:100%;}
+    @keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
     .deficit-bar{background:rgba(220,53,40,.1);border-bottom:2px solid rgba(220,53,40,.3);padding:10px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
     .deficit-label{font-size:9px;letter-spacing:.2em;color:var(--red);font-family:var(--mono);}
     .deficit-num{font-family:var(--cond);font-size:clamp(18px,5vw,28px);font-weight:900;color:var(--red);letter-spacing:.02em;}
@@ -1412,6 +1465,8 @@ a{color:inherit;}
     .out-w{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2);}
     .flip-share-btn{display:block;width:100%;margin-top:8px;padding:7px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:5px;color:#4ade80;font-family:var(--cond);font-size:12px;font-weight:700;cursor:pointer;transition:all .12s;}
     .flip-share-btn:hover{background:rgba(74,222,128,.2);}
+    .flip-signup-btn{display:block;width:100%;margin-top:6px;padding:9px 10px;background:rgba(232,200,74,.08);border:1.5px solid rgba(232,200,74,.35);border-radius:5px;color:var(--gold);font-family:var(--cond);font-size:12px;font-weight:700;cursor:pointer;transition:all .12s;text-align:center;}
+    .flip-signup-btn:hover{background:rgba(232,200,74,.15);border-color:var(--gold);}
     .out-l{background:rgba(220,53,40,.08);color:#ef4444;border:1px solid rgba(220,53,40,.16);}
     @keyframes pop{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1;}}
 
@@ -1461,7 +1516,16 @@ a{color:inherit;}
     .flip-btn:hover:not(:disabled){background:var(--green2);transform:translateY(-1px);}
     .flip-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
     .flip-hint{width:100%;padding:14px;text-align:center;color:#B0ADA6;font-family:var(--cond);font-size:15px;font-weight:700;border:2px dashed rgba(234,232,224,.15);border-radius:7px;letter-spacing:.05em;}
-    .refill-btn{width:100%;padding:10px;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:11px;border-radius:6px;cursor:pointer;}
+    .bust-box{text-align:center;padding:20px 10px;background:rgba(220,53,40,.06);border:1px solid rgba(220,53,40,.2);border-radius:10px;}
+    .bust-em{font-size:48px;margin-bottom:8px;}
+    .bust-title{font-family:var(--cond);font-size:28px;font-weight:900;color:var(--red);letter-spacing:.08em;margin-bottom:6px;}
+    .bust-sub{font-size:11px;color:#A8A5A0;line-height:1.6;margin-bottom:14px;}
+    .refill-btn{width:100%;padding:13px;background:var(--green);border:none;color:#fff;font-family:var(--cond);font-weight:800;font-size:15px;border-radius:7px;cursor:pointer;letter-spacing:.04em;display:flex;flex-direction:column;align-items:center;gap:3px;}
+    .refill-btn:hover{background:var(--green2);}
+    .refill-btn--share{background:rgba(232,200,74,.12);border:2px solid var(--gold);color:var(--gold);margin-top:0;}
+    .refill-btn--share:hover{background:rgba(232,200,74,.22);}
+    .refill-tag{font-size:10px;font-weight:400;opacity:.75;font-family:var(--mono);letter-spacing:0;}
+    .bust-or{font-size:11px;color:#7E7C77;margin:10px 0;letter-spacing:.1em;}
     .refill-btn:hover{border-color:var(--green2);color:var(--green2);}
     .chips-row{display:flex;gap:4px;flex-wrap:wrap;}
     .chip{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:1.5px solid;font-family:var(--mono);}
