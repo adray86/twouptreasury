@@ -488,9 +488,10 @@ lowestEver: Math.min(profile.lowestEver??STARTING, nb),
 setResult(r); setOutcome(won?“win”:“lose”);
 setProfile(updated);
 setHist(h=>[{r,won,eff},…h.slice(0,11)]);
+const rLabel = r===“H” ? “🦅 HEADS” : “🦘 TAILS”;
 setFlipMsg(won
-? `+$${fmtN(eff)} — ${nb>=ALBO?`🏖️ ${(nb/ALBO).toFixed(1)}× Albo’s house!`:"heads wins"}`
-: `-$${fmtN(eff)} — ${nb<100?"oof. very Australian.":"tails wins"}`
+? `+$${fmtN(eff)} — ${nb>=ALBO?`🏖️ ${(nb/ALBO).toFixed(1)}× Albo’s house!`:`${rLabel} — you win!`}`
+: `-$${fmtN(eff)} — ${rLabel} — you lose.`
 );
 setPhase(“done”);
 await persist(updated);
@@ -516,7 +517,7 @@ return (
 ```
   <nav className="nav">
     <button className="nav-back" onClick={onBack}>← Back</button>
-    <div className="nav-logo">🪙 TWO-UP</div>
+    <div className="nav-logo">🎲 DOUBLE DOWN</div>
     <div className="nav-r">
       {topHouse && <span className="nav-house" title={topHouse.label}>{topHouse.emoji}</span>}
       {!isGuest && <span className="nav-user">{profile.name}</span>}
@@ -578,13 +579,20 @@ return (
 
       <Coin phase={phase} result={result}/>
 
-      <div className="sec-lbl">YOUR CALL</div>
+      <div className="sec-lbl" style={{fontSize:"11px",color:"#B0ADA6",letterSpacing:".18em"}}>STEP 1 — HEADS OR TAILS?</div>
       <div className="pick-row">
-        <button className={`pick${pick==="H"?" pick--on":""}`} onClick={()=>setPick("H")}>🦅 HEADS</button>
-        <button className={`pick${pick==="T"?" pick--on":""}`} onClick={()=>setPick("T")}>🦘 TAILS</button>
+        <button className={`pick${pick==="H"?" pick--on":""}`} onClick={()=>setPick("H")}>
+          <span className="pick-em">🦅</span>
+          <span className="pick-lbl">HEADS</span>
+        </button>
+        <button className={`pick${pick==="T"?" pick--on":""}`} onClick={()=>setPick("T")}>
+          <span className="pick-em">🦘</span>
+          <span className="pick-lbl">TAILS</span>
+        </button>
       </div>
+      {pick && <div className="pick-confirm">Your call: <strong>{pick==="H"?"🦅 HEADS":"🦘 TAILS"}</strong></div>}
 
-      <div className="sec-lbl">STAKE</div>
+      <div className="sec-lbl" style={{fontSize:"11px",color:"#B0ADA6",letterSpacing:".18em",marginTop:"8px"}}>STEP 2 — HOW MUCH?</div>
       <div className="bet-display">
         <span className="bet-currency">$</span>
         <input
@@ -608,19 +616,15 @@ return (
           return <button key={label} className={`bp-btn${+(custom||stake)===val?" bp-btn--on":""}`} onClick={()=>setCustom(String(val))}>{label}</button>;
         })}
       </div>
-      <div className="bet-adj">
-        <button className="adj-btn" onClick={()=>setCustom(String(Math.max(1,Math.floor((+(custom||stake))/2))))}>÷2</button>
-        <button className="adj-btn" onClick={()=>setCustom(String(Math.min(profile.balance,(+(custom||stake))*2)))}>×2</button>
-        <button className="adj-btn" onClick={()=>setCustom(String(Math.min(profile.balance,(+(custom||stake))*5)))}>×5</button>
-        <button className="adj-btn" onClick={()=>setCustom(String(Math.min(profile.balance,(+(custom||stake))+100)))}>+$100</button>
-        <button className="adj-btn" onClick={()=>setCustom(String(Math.min(profile.balance,(+(custom||stake))+500)))}>+$500</button>
-      </div>
+
 
       {profile.balance<=0
         ? <button className="refill-btn" onClick={()=>{ const r={...profile,balance:STARTING,flips:0,wins:0}; setProfile(r); setHist([]); if(!isGuest)persist(r); }}>🔄 Refill to $1,000</button>
-        : <button className="flip-btn" disabled={!pick||phase!=="idle"||eff>profile.balance||eff<=0} onClick={flip}>
-            {phase==="spin"?"FLIPPING…":`FLIP — $${fmtN(eff)}`}
-          </button>
+        : !pick
+          ? <div className="flip-hint">👆 Pick heads or tails first</div>
+          : <button className="flip-btn" disabled={phase!=="idle"||eff>profile.balance||eff<=0} onClick={flip}>
+              {phase==="spin"?"FLIPPING…":`${pick==="H"?"🦅 HEADS":"🦘 TAILS"} — FLIP $${fmtN(eff)}`}
+            </button>
       }
 
       {hist.length>0&&(
@@ -843,7 +847,7 @@ return (
           Chalmers axed your CGT discount. Albo bought a <strong>$4.3M beach house</strong> during a cost-of-living crisis.<br/>
           We built Australia's most financially irresponsible coin flip. <strong>$1,000 to start. Free forever.</strong>
         </p>
-        <button className="cta cta--big" onClick={onPlay}>🎲 Play Free — Start with $1,000 →</button>
+        <button className="cta cta--big" onClick={onPlay}>🎲 Screw the Government. Here's a Grand.</button>
         <div className="social-share-row">
           <button className="ss-btn ss-tw" onClick={()=>tweet("Jim Chalmers killed the CGT discount and left a $28.3B deficit.\n\nAlbo bought a $4.3M beach house during a cost-of-living crisis.\n\nWe built a coin flip.\n\ndoubledown.au 🪙🇦🇺\n@JEChalmers @AlboMP")}>𝕏 Tweet</button>
           <button className="ss-btn ss-rd" onClick={()=>window.open("https://www.reddit.com/submit?url=https://doubledown.au&title="+encodeURIComponent("We built a coin flip to explain the 2026 budget — your goal is to buy Albo's $4.3M beach house"),"_blank")}>📮 Reddit</button>
@@ -1400,9 +1404,14 @@ a{color:inherit;}
     /* PICKS */
     .sec-lbl{font-size:9px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;}
     .pick-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
-    .pick{padding:10px;border-radius:6px;border:1.5px solid var(--border);background:transparent;color:var(--text);font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:all .12s;}
-    .pick:hover,.pick--on{border-color:var(--gold);color:var(--gold);}
-    .pick--on{background:rgba(232,200,74,.09);}
+    .pick{padding:18px 10px;border-radius:10px;border:2px solid rgba(234,232,224,.18);background:rgba(255,255,255,.03);color:#B0ADA6;font-family:var(--cond);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px;}
+    .pick-em{font-size:36px;line-height:1;}
+    .pick-lbl{font-size:13px;font-weight:800;letter-spacing:.12em;}
+    .pick-confirm{text-align:center;font-family:var(--cond);font-size:14px;color:#B0ADA6;padding:6px 0 2px;}
+    .pick-confirm strong{color:var(--gold);}
+    .pick:hover{border-color:rgba(232,200,74,.4);color:var(--gold);}
+    .pick--on{border-color:var(--gold)!important;color:var(--gold)!important;background:rgba(232,200,74,.12)!important;box-shadow:0 0 20px rgba(232,200,74,.2);}
+
     .stakes-row{display:flex;gap:5px;flex-wrap:wrap;}
     /* BET UI */
     .bet-display{display:flex;align-items:center;background:#141A12;border:2px solid rgba(232,200,74,.5);border-radius:8px;padding:8px 14px;margin-bottom:10px;gap:6px;}
@@ -1424,6 +1433,7 @@ a{color:inherit;}
     .flip-btn{width:100%;padding:14px;background:var(--green);border:none;color:#fff;font-family:var(--cond);font-weight:900;font-size:17px;letter-spacing:.05em;border-radius:7px;cursor:pointer;transition:all .15s;box-shadow:0 4px 14px rgba(27,122,68,.35);}
     .flip-btn:hover:not(:disabled){background:var(--green2);transform:translateY(-1px);}
     .flip-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+    .flip-hint{width:100%;padding:14px;text-align:center;color:#B0ADA6;font-family:var(--cond);font-size:15px;font-weight:700;border:2px dashed rgba(234,232,224,.15);border-radius:7px;letter-spacing:.05em;}
     .refill-btn{width:100%;padding:10px;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:11px;border-radius:6px;cursor:pointer;}
     .refill-btn:hover{border-color:var(--green2);color:var(--green2);}
     .chips-row{display:flex;gap:4px;flex-wrap:wrap;}
