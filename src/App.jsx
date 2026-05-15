@@ -425,7 +425,7 @@ We accept donations in <strong>AUD or NZD</strong> — because at least one of t
 ☕ Support on Ko-fi
 <span className="don-tag">0% platform fee · set up at ko.fi</span>
 </a>
-<a className="don-btn don-btn--bmc" href="https://buymeacoffee.com" target="_blank" rel="noopener noreferrer">
+<a className="don-btn don-btn--bmc" href="https://buymeacoffee.com/queeflatinah" target="_blank" rel="noopener noreferrer">
 🍺 Buy Me a Tinny
 <span className="don-tag">5% platform fee · buymeacoffee.com</span>
 </a>
@@ -830,7 +830,7 @@ return (
         <div className="gdon-pitch">Milk: $3.50. Avo toast: $24. A tinny: $9. Albo's house: $4.3M.</div>
         <div className="gdon-btns">
           <a className="gdon-btn" href="https://ko.fi/doubledown" target="_blank" rel="noopener noreferrer">☕ Ko-fi (0% fee)</a>
-          <a className="gdon-btn gdon-btn--b" href="https://buymeacoffee.com" target="_blank" rel="noopener noreferrer">🍺 BMC (5% fee)</a>
+          <a className="gdon-btn gdon-btn--b" href="https://buymeacoffee.com/queeflatinah" target="_blank" rel="noopener noreferrer">🍺 BMC (5% fee)</a>
         </div>
 
       </div>
