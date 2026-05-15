@@ -411,29 +411,32 @@ onSignIn(profile);
 
 return (
 <div className="auth-page">
-<div className="auth-logo">🪙</div>
+<div className="auth-logo">🎲</div>
 <h1 className="auth-h1">DOUBLE DOWN</h1>
-<p className="auth-sub">Australia’s most straightforward financial instrument.<br/>Heads or tails. $1,000 to start. Leaderboard. Badges.</p>
-<div className="auth-card">
-<div className="auth-s">
-<div className="auth-lbl">CREATE ACCOUNT OR SIGN IN</div>
-<div className="auth-micro">Saves your balance and badges across sessions. Appear on the leaderboard.</div>
-<input className=“auth-inp” placeholder=“Choose a username…” value={name}
-onChange={e=>{setName(e.target.value);setError(””);}}
-onKeyDown={e=>e.key===“Enter”&&handleSignIn()} maxLength={20} autoFocus/>
-{error && <div className="auth-err">{error}</div>}
-<button className="auth-btn" disabled={!name.trim()||loading} onClick={handleSignIn}>
-{loading?“Loading…”:“Play & Save Progress →”}
-</button>
-<div className="auth-hint">New username = new account · starts at $1,000</div>
+<p className="auth-sub">Jim Chalmers took your CGT discount.<br/>Albo bought a $4.3M beach house during a cost-of-living crisis.<br/><strong>Here’s $1,000. Make it back.</strong></p>
+
+```
+  <button className="auth-btn auth-btn--guest" onClick={onGuest}>
+    🎲 Play Now — No Signup
+  </button>
+  <p className="auth-guest-note">Free forever · $1,000 to start · no signup needed</p>
+
+  <div className="auth-divider">— or save your progress —</div>
+
+  <div className="auth-card">
+    <div className="auth-lbl">PICK A NAME. KEEP YOUR SCORE.</div>
+    <input className="auth-inp" placeholder="Username (e.g. ChalmersBuster99)…" value={name}
+      onChange={e=>{setName(e.target.value);setError("");}}
+      onKeyDown={e=>e.key==="Enter"&&handleSignIn()} maxLength={20}/>
+    {error && <div className="auth-err">{error}</div>}
+    <button className="auth-btn" disabled={!name.trim()||loading} onClick={handleSignIn}>
+      {loading?"Loading…":"Save My Progress →"}
+    </button>
+    <div className="auth-hint">Appears on the leaderboard · badges persist · pick a new name to start fresh</div>
+  </div>
 </div>
-<div className="auth-or">— or —</div>
-<div className="auth-s">
-<button className="auth-btn auth-btn--ghost" onClick={onGuest}>Play as Guest (session only)</button>
-<div className="auth-hint">$1,000 credits · resets when you leave · no leaderboard · no badges saved</div>
-</div>
-</div>
-</div>
+```
+
 );
 }
 
@@ -574,7 +577,14 @@ return (
 
       {/* OUTCOME */}
       {flipMsg && (
-        <div className={`outcome${outcome==="win"?" out-w":" out-l"}`}>{flipMsg}</div>
+        <div className={`outcome${outcome==="win"?" out-w":" out-l"}`}>
+          {flipMsg}
+          {outcome==="win" && <button className="flip-share-btn" onClick={()=>{
+            const pct=((profile.balance/4300000)*100).toFixed(2);
+            const txt=`I just flipped ${pick==="H"?"🦅 HEADS":"🦘 TAILS"} on doubledown.au and won! Balance: $${profile.balance.toLocaleString()} — that's ${pct}% of Albo's $4.3M beach house 🏖️🇦🇺`;
+            navigator.share?navigator.share({text:txt,url:"https://doubledown.au"}):navigator.clipboard.writeText(txt);
+          }}>📤 Share this flip</button>}
+        </div>
       )}
 
       <Coin phase={phase} result={result}/>
@@ -843,11 +853,16 @@ return (
       <div className="hero">
         <div className="hero-eye">🇦🇺 FREE · SATIRICAL · PLAY CREDITS ONLY</div>
         <h1 className="hero-h1">Ignore CGT.<br/><em>Double Down.</em><br/>Don't Pay A Cent.</h1>
+    <div className="hero-stats">
+      <div className="hstat"><span className="hstat-n">$28.3B</span><span className="hstat-l">deficit they left you</span></div>
+      <div className="hstat"><span className="hstat-n">$4.3M</span><span className="hstat-l">Albo's beach house</span></div>
+      <div className="hstat"><span className="hstat-n">$1,000</span><span className="hstat-l">we're giving you</span></div>
+    </div>
         <p className="hero-p">
           Chalmers axed your CGT discount. Albo bought a <strong>$4.3M beach house</strong> during a cost-of-living crisis.<br/>
           We built Australia's most financially irresponsible coin flip. <strong>$1,000 to start. Free forever.</strong>
         </p>
-        <button className="cta cta--big" onClick={onPlay}>🎲 Screw the Government. Here's a Grand.</button>
+        <button className="cta cta--big" onClick={onPlay}>F*#k the Budget. Here's $1,000. Flip Now. →</button>
         <div className="social-share-row">
           <button className="ss-btn ss-tw" onClick={()=>tweet("Jim Chalmers killed the CGT discount and left a $28.3B deficit.\n\nAlbo bought a $4.3M beach house during a cost-of-living crisis.\n\nWe built a coin flip.\n\ndoubledown.au 🪙🇦🇺\n@JEChalmers @AlboMP")}>𝕏 Tweet</button>
           <button className="ss-btn ss-rd" onClick={()=>window.open("https://www.reddit.com/submit?url=https://doubledown.au&title="+encodeURIComponent("We built a coin flip to explain the 2026 budget — your goal is to buy Albo's $4.3M beach house"),"_blank")}>📮 Reddit</button>
@@ -922,7 +937,7 @@ return (
             { q:"Albanese said 'I know what it's like to struggle.' Then bought a $4.3M clifftop. We built a leaderboard.", share:"'I know what it's like to struggle' — Anthony Albanese, who owns a $4.3M beach house. doubledown.au" },
             { q:"Four years to see your tax cuts. Four seconds to flip for yours.", share:"Four years to see your tax cuts. Four seconds to flip for yours. doubledown.au 🪙" },
             { q:"The Treasurer says the deficit improved by $8.5 billion. It's still $28.3B. We'll take that bet.", share:"The Treasurer says the deficit 'improved.' It's still $28.3B. We'll take that bet: doubledown.au @JEChalmers" },
-            { q:"Two-up: Australia's oldest financial instrument. Older than negative gearing. More reliable than Labor.", share:"Two-up: older than negative gearing. More reliable than Labor. doubledown.au 🇦🇺" },
+            { q:"Two-up was banned for 364 days a year. Negative gearing wasn't. Make of that what you will.", share:"Two-up: older than negative gearing. More reliable than Labor. doubledown.au 🇦🇺" },
           ].map((j,i)=>(
             <div className="joke" key={i}>
               <span className="joke-n">0{i+1}</span>
@@ -1139,7 +1154,12 @@ a{color:inherit;}
     .auth-page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;background:#080C0A;}
     .auth-logo{font-size:56px;margin-bottom:10px;}
     .auth-h1{font-family:var(--cond);font-size:clamp(28px,8vw,58px);font-weight:900;color:var(--gold);letter-spacing:.05em;margin-bottom:8px;}
-    .auth-sub{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:28px;}
+    .auth-sub{font-size:13px;color:#B0ADA6;line-height:1.7;margin-bottom:22px;max-width:320px;}
+    .auth-sub strong{color:#EAE8E0;}
+    .auth-btn--guest{width:100%;max-width:340px;padding:18px;font-size:19px;margin-bottom:8px;background:var(--green);border:none;color:#fff;font-family:var(--cond);font-weight:900;letter-spacing:.04em;border-radius:8px;cursor:pointer;box-shadow:0 6px 32px rgba(27,122,68,.5);animation:pulse 2s ease-in-out infinite;}
+    .auth-btn--guest:hover{background:var(--green2);}
+    .auth-guest-note{font-size:10px;color:#7E7C77;margin-bottom:16px;letter-spacing:.08em;}
+    .auth-divider{font-size:11px;color:#7E7C77;margin:8px 0 16px;letter-spacing:.1em;}
     .auth-card{background:#1A2218;border:1px solid rgba(234,232,224,.2);border-radius:12px;padding:26px;max-width:360px;width:100%;}
     .auth-s{}
     .auth-lbl{font-size:9px;letter-spacing:.22em;color:var(--muted);margin-bottom:4px;}
@@ -1162,7 +1182,12 @@ a{color:inherit;}
     .hero-eye{font-size:10px;letter-spacing:.18em;color:#B0ADA6;margin-bottom:16px;}
     .hero-h1{font-family:var(--cond);font-weight:900;font-size:clamp(42px,9vw,100px);line-height:.88;color:var(--text);margin-bottom:22px;}
     .hero-h1 em{font-style:normal;color:var(--gold);}
-    .hero-p{font-size:13px;line-height:1.8;color:#C4C1BA;max-width:520px;margin:0 auto 26px;}
+    .hero-p{font-size:13px;line-height:1.8;color:#C4C1BA;max-width:520px;margin:0 auto 20px;}
+    .hero-stats{display:flex;gap:0;justify-content:center;margin:20px auto;max-width:480px;border:1px solid rgba(234,232,224,.1);border-radius:10px;overflow:hidden;}
+    .hstat{flex:1;padding:14px 10px;text-align:center;border-right:1px solid rgba(234,232,224,.1);}
+    .hstat:last-child{border-right:none;}
+    .hstat-n{display:block;font-family:var(--cond);font-size:clamp(16px,4vw,24px);font-weight:900;color:var(--gold);}
+    .hstat-l{display:block;font-size:9px;color:#7E7C77;letter-spacing:.1em;margin-top:2px;}
     .hero-p strong{color:var(--text);}
     .hero-ctas{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;}
     .cta{background:var(--green);border:none;color:#fff;font-family:var(--cond);font-weight:800;font-size:17px;letter-spacing:.05em;padding:15px 36px;border-radius:6px;cursor:pointer;transition:all .15s;box-shadow:0 4px 24px rgba(27,122,68,.5);}
@@ -1385,6 +1410,8 @@ a{color:inherit;}
     /* OUTCOME */
     .outcome{padding:9px 12px;border-radius:6px;font-family:var(--cond);font-size:13px;font-weight:700;animation:pop .35s cubic-bezier(.34,1.56,.64,1);}
     .out-w{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2);}
+    .flip-share-btn{display:block;width:100%;margin-top:8px;padding:7px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:5px;color:#4ade80;font-family:var(--cond);font-size:12px;font-weight:700;cursor:pointer;transition:all .12s;}
+    .flip-share-btn:hover{background:rgba(74,222,128,.2);}
     .out-l{background:rgba(220,53,40,.08);color:#ef4444;border:1px solid rgba(220,53,40,.16);}
     @keyframes pop{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1;}}
 
