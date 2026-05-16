@@ -1120,6 +1120,7 @@ onPass={()=>setShowStreak(false)}/>}
 
     {/* LEADERBOARD */}
     <div className={`board-col${tab!=="board"?" board-col--hidden":""}`}>
+      <RecentFlips/>
       <Leaderboard currentUser={isGuest?null:profile.name}/>
       {isGuest&&<div className="guest-note guest-note--cta">
         <div className="gn-title">👻 You're invisible.</div>
@@ -1357,119 +1358,40 @@ return (
           <button className="caric-btn" onClick={()=>tweet('Jim Chalmers left a $28.3B deficit and called it ambitious.\n\nWe built a coin flip. doubledown.au @JEChalmers')}>Share this</button>
         </div>
       </div>
-
-      {/* 1980 CALCULATORfect, useRef, useCallback } from "react";
 ```
 
-import { supabase } from “./supabase.js”;
-
-// ─── SEO ─────────────────────────────────────────────────────────────────────
-function injectMeta() {
-document.title = “Double Down | Beat Albo’s $4.3M Beach House — One Flip At A Time”;
-const rob = document.createElement(“meta”); rob.name=“robots”; rob.content=“index,follow”; document.head.appendChild(rob);
-[
-[“description”,“Double Down: Australia’s most ambitious coin flip. $1,000 to start. Global leaderboard. Badges. See what your money bought in 1980 vs now.”],
-[“og:title”,“Double Down | Ignore CGT. Flip a Coin. Don’t Pay A Cent.”],
-[“og:description”,“Start with $1,000 in play credits. Flip coins. Earn badges. Climb the leaderboard. Jim Chalmers bought a $4.3M beach house. Beat him.”],
-[“keywords”,“Australia budget satire, coin flip, doubledown.au, Jim Chalmers, Albanese beach house, CGT discount, 1980 prices Australia, leaderboard”],
-[“twitter:card”,“summary_large_image”],
-[“twitter:title”,“Double Down — Beat Albo’s $4.3M Beach House”],
-[“twitter:description”,“Free coin flip. $1,000 to start. Albo’s $4.3M house is the goal. Deficit ticking at $897/sec. doubledown.au”],
-[“og:url”,“https://doubledown.au”],
-].forEach(([k,v]) => {
-const m = document.createElement(“meta”);
-m.setAttribute(k.includes(“og:”) ? “property” : “name”, k);
-m.content = v; document.head.appendChild(m);
-});
-// JSON-LD structured data for Google
-const ld = document.createElement(“script”);
-ld.type = “application/ld+json”;
-ld.text = JSON.stringify({
-“@context”:“https://schema.org”,
-“@type”:“WebApplication”,
-“name”:“Double Down”,
-“url”:“https://doubledown.au”,
-“description”:“Free satirical coin flip. Start with $1,000. Beat Albo’s $4.3M beach house. Jim Chalmers’ deficit: $28.3 billion. Your goal: earn more.”,
-“applicationCategory”:“Game”,
-“operatingSystem”:“Any”,
-“offers”:{”@type”:“Offer”,“price”:“0”,“priceCurrency”:“AUD”},
-“keywords”:“Australian budget satire, coin flip, Jim Chalmers, Albanese beach house, CGT, doubledown.au”
-});
-document.head.appendChild(ld);
-const can = document.createElement(“link”);
-can.rel = “canonical”; can.href = “https://doubledown.au”;
-document.head.appendChild(can);
+// ─── RECENT FLIPS FEED ────────────────────────────────────────────────────────
+function RecentFlips() {
+const [flips, setFlips] = useState([]);
+useEffect(()=>{
+async function load() {
+try {
+const {data} = await supabase.from(“activity_feed”)
+.select(”*”).order(“created_at”,{ascending:false}).limit(10);
+if(data) setFlips(data);
+} catch {}
 }
-
-// ─── BADGE DEFINITIONS ────────────────────────────────────────────────────────
-// Albo’s Copacabana clifftop house = $4,300,000
-const ALBO = 4_300_000;
-const BADGES = [
-{ id:“first_flip”,  emoji:“🪙”, label:“First Flip”,          desc:“You flipped your first coin. Welcome.”,                                          check: p => p.flips >= 1 },
-{ id:“in_green”,    emoji:“📈”, label:“In The Green”,         desc:“Balance above $1,000. Unlike the federal budget.”,                               check: p => p.balance > 1000 },
-{ id:“avo”,         emoji:“🥑”, label:“Avo Toast Money”,      desc:”$2,000+ — enough for 83 café avocado toasts at $24 a pop.”,                     check: p => p.balance >= 2000 },
-{ id:“tinny”,       emoji:“🍺”, label:“Shout A Round”,        desc:”$5,000+ — a tinny costs $9 now. Buy a round while you can.”,                    check: p => p.balance >= 5000 },
-{ id:“surplus”,     emoji:“📊”, label:“Budget Surplus”,       desc:”$10,000+ — you’ve already beat Chalmers. His deficit is $28.3 billion.”,        check: p => p.balance >= 10_000 },
-{ id:“deposit”,     emoji:“🗝️”, label:“First Home Deposit”,   desc:”$50,000+ — a deposit. Somewhere regional. 2004 prices.”,                       check: p => p.balance >= 50_000 },
-{ id:“negear”,      emoji:“💼”, label:“Negative Gearer”,      desc:”$100,000+ — losses deductible against other income. For now.”,                  check: p => p.balance >= 100_000 },
-{ id:“landlord”,    emoji:“🏘️”, label:“Portfolio Landlord”,   desc:”$500,000+ — time to raise the rent and blame council rates.”,                   check: p => p.balance >= 500_000 },
-{ id:“albo1”,       emoji:“🏖️”, label:“1× Albo’s House”,     desc:”$4.3M — Copacabana clifftop. Ocean views. Purchased during a cost-of-living crisis.”,  check: p => p.balance >= ALBO },
-{ id:“albo2”,       emoji:“🏖️🏖️”, label:“2× Albo’s Houses”,  desc:”$8.6M — you could gift one to a struggling renter and still be fine.”,         check: p => p.balance >= ALBO*2 },
-{ id:“albo3”,       emoji:“🏖️🏖️🏖️”, label:“3× Albo’s Houses”, desc:”$12.9M — at this point you’re basically a Liberal Party donor.”,              check: p => p.balance >= ALBO*3 },
-{ id:“albo5”,       emoji:“🌊”, label:“5× Albo’s Houses”,     desc:”$21.5M — property portfolio bigger than most super funds.”,                     check: p => p.balance >= ALBO*5 },
-{ id:“albo10”,      emoji:“🌊🌊”, label:“10× Albo’s Houses”,   desc:”$43M — the ocean views are yours. All of them.”,                               check: p => p.balance >= ALBO*10 },
-{ id:“century”,     emoji:“💯”, label:“Century Flipper”,       desc:“100 flips. Dedicated.”,                                                         check: p => p.flips >= 100 },
-{ id:“survivor”,    emoji:“🦘”, label:“True Blue Survivor”,    desc:“Got below $100 and climbed back. Very Australian.”,                             check: p => p.lowestEver !== undefined && p.lowestEver < 100 && p.balance > p.lowestEver },
-];
-
-function getEarnedBadges(profile) {
-return BADGES.filter(b => b.check(profile));
-}
-function getHighestHouseBadge(profile) {
-const houses = BADGES.filter(b => b.id.startsWith(“albo”) && b.check(profile));
-return houses.length ? houses[houses.length - 1] : null;
-}
-
-// ─── LIVE DEFICIT COUNTER ─────────────────────────────────────────────────────
-// $28.3B deficit / 365 days / 24h / 3600s = ~$897/second
-function DeficitCounter() {
-const BASE = 28_300_000_000;
-const PER_SEC = 897;
-const [count, setCount] = useState(BASE);
-useEffect(() => {
-const t = setInterval(() => setCount(n => n + PER_SEC), 1000);
-return () => clearInterval(t);
-}, []);
+load(); const t=setInterval(load,5000); return()=>clearInterval(t);
+},[]);
+if(!flips.length) return null;
 return (
-<div className="deficit-bar">
-<span className="deficit-label">🇦🇺 NATIONAL DEFICIT — LIVE</span>
-<span className="deficit-num">${count.toLocaleString(“en-AU”)}</span>
-<span className="deficit-sub">+$897 every second · Jim Chalmers calls this “an improvement”</span>
+<div className="recent-flips-feed">
+<div className="rf-title">⚡ LIVE FLIPS</div>
+{flips.map((f,i)=>(
+<div key={f.id||i} className="rf-item">
+<span className="rf-action">{f.action}</span>
+<span className="rf-time">{timeAgo(f.created_at)}</span>
+</div>
+))}
 </div>
 );
 }
 
-// ─── LEADER TICKER ────────────────────────────────────────────────────────────
-function LeaderTicker() {
-const [lb, setLb] = useState([]);
-useEffect(() => {
-async function load() { const d = await getLeaderboard(); setLb(d.slice(0,10)); }
-load();
-const t = setInterval(load, 20000);
-return () => clearInterval(t);
-}, []);
-if (!lb.length) return null;
-const medals = [“🥇”,“🥈”,“🥉”];
-const items = lb.map((e,i) => `${medals[i]||("#"+(i+1))} ${e.topHouseEmoji||""}${e.name}  $${Number(e.balance).toLocaleString("en-AU")}`);
-const txt = […items,…items].join(”   ·   “);
-return (
-<div className="ticker-wrap">
-<span className="ticker-tag">🏆 LEADERBOARD</span>
-<div className="ticker-scroll">
-<span className="ticker-txt">{txt}</span>
-</div>
-</div>
-);
+function timeAgo(ts) {
+const s = Math.floor((Date.now() - new Date(ts).getTime())/1000);
+if(s<60) return `${s}s ago`;
+if(s<3600) return `${Math.floor(s/60)}m ago`;
+return `${Math.floor(s/3600)}h ago`;
 }
 
 // ─── ROOT ──────────────────────────────────────────────────────────────────────
